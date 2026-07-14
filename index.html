@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Моя комната</title>
+    <link href="https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            overflow: hidden;
+            width: 100%;
+            height: 100dvh;
+            font-family: 'PT Serif', Georgia, serif;
+            background: #0a0a0a;
+            touch-action: manipulation;
+        }
+
+        #app {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: opacity 0.45s ease;
+        }
+        #app.fading { opacity: 0; }
+
+        #room-bg {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        #room-bg::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                to bottom,
+                rgba(0,0,0,0.1) 0%,
+                rgba(0,0,0,0) 35%,
+                rgba(0,0,0,0.05) 55%,
+                rgba(0,0,0,0.55) 100%
+            );
+            pointer-events: none;
+        }
+
+        #dialog-box {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 22px 20px 30px;
+            background: linear-gradient(
+                to bottom,
+                rgba(8, 8, 8, 0.82) 0%,
+                rgba(8, 8, 8, 0.95) 100%
+            );
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-top: 1px solid rgba(200, 160, 110, 0.15);
+            min-height: 170px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                        opacity 0.5s ease;
+            z-index: 10;
+        }
+        #dialog-box.hidden {
+            transform: translateY(100%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #dialog-text {
+            color: #e4dcd2;
+            font-size: 15.5px;
+            line-height: 1.75;
+            margin-bottom: 18px;
+            min-height: 55px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        #dialog-btn {
+            align-self: flex-end;
+            padding: 9px 26px;
+            background: rgba(200, 160, 110, 0.12);
+            border: 1px solid rgba(200, 160, 110, 0.35);
+            color: #c8a06e;
+            font-family: 'PT Serif', Georgia, serif;
+            font-size: 13.5px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.15s ease;
+            letter-spacing: 0.3px;
+        }
+        #dialog-btn:active {
+            background: rgba(200, 160, 110, 0.28);
+            transform: scale(0.95);
+        }
+
+        .hotspot {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            cursor: pointer;
+        }
+        .hotspot:active { transform: translate(-50%, -50%) scale(0.85); }
+
+        .hotspot-glow {
+            position: absolute;
+            inset: -40%;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(200,160,110,0.25) 0%, transparent 70%);
+            animation: glowPulse 2.2s ease-in-out infinite;
+        }
+        @keyframes glowPulse {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50%      { opacity: 1;   transform: scale(1.15); }
+        }
+
+        .hotspot-ring {
+            position: absolute;
+            inset: -20%;
+            border-radius: 50%;
+            border: 1.5px solid rgba(200, 160, 110, 0.45);
+            animation: ringExpand 2.2s ease-out infinite;
+        }
+        .hotspot-ring:nth-child(2) { animation-delay: 0.75s; }
+        @keyframes ringExpand {
+            0%   { transform: scale(0.4); opacity: 0.9; }
+            100% { transform: scale(2);   opacity: 0; }
+        }
+
+        .hotspot-dot {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: #c8a06e;
+            box-shadow: 0 0 10px rgba(200, 160, 110, 0.7),
+                        0 0 25px rgba(200, 160, 110, 0.25);
+        }
+
+        #back-btn {
+            position: fixed;
+            top: 14px; left: 14px;
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            background: rgba(8, 8, 8, 0.55);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #d8d0c6;
+            font-size: 17px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 20;
+            transition: background 0.2s ease, transform 0.15s ease;
+            line-height: 1;
+        }
+        #back-btn:active {
+            background: rgba(8, 8, 8, 0.8);
+            transform: scale(0.9);
+        }
+        #back-btn.visible { display: flex; }
+
+        #hint {
+            position: fixed;
+            bottom: 24px;
+            left: 50%; transform: translateX(-50%);
+            color: rgba(228, 220, 210, 0.35);
+            font-size: 11.5px;
+            letter-spacing: 1.2px;
+            z-index: 6;
+            pointer-events: none;
+            display: none;
+            animation: hintBreath 3.5s ease-in-out infinite;
+            white-space: nowrap;
+        }
+        #hint.visible { display: block; }
+        @keyframes hintBreath {
+            0%, 100% { opacity: 0.25; }
+            50%      { opacity: 0.55; }
+        }
+
+        /* ========== Музыкальная полка ========== */
+        #music-shelf {
+            position: fixed;
+            bottom: 0;
+            left: 0; right: 0;
+            padding: 18px 0 26px;
+            background: linear-gradient(
+                to top,
+                rgba(8, 8, 8, 0.94) 0%,
+                rgba(8, 8, 8, 0.82) 65%,
+                transparent 100%
+            );
+            z-index: 10;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                        opacity 0.5s ease;
+        }
+        #music-shelf.hidden {
+            transform: translateY(100%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #shelf-track {
+            display: flex;
+            gap: 14px;
+            overflow-x: auto;
+            padding: 0 20px;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-x;
+            scrollbar-width: none;
+        }
+        #shelf-track::-webkit-scrollbar { display: none; }
+
+        .shelf-card {
+            flex-shrink: 0;
+            width: 115px;
+            scroll-snap-align: start;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .shelf-card:active { transform: scale(0.94); }
+
+        .shelf-cover {
+            width: 115px;
+            height: 115px;
+            border-radius: 10px;
+            background-size: cover;
+            background-position: center;
+            border: 2px solid transparent;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.45);
+        }
+        .shelf-card.active .shelf-cover {
+            border-color: #c8a06e;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.45),
+                        0 0 16px rgba(200, 160, 110, 0.2);
+        }
+
+        .shelf-artist {
+            margin-top: 8px;
+            font-size: 11.5px;
+            color: #c0b8ac;
+            text-align: center;
+            line-height: 1.25;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .shelf-track-name {
+            margin-top: 2px;
+            font-size: 10.5px;
+            color: rgba(192, 184, 172, 0.5);
+            text-align: center;
+            font-style: italic;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* ========== Встроенный плеер ========== */
+        #music-player {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(12, 12, 12, 0.97);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-top: 1px solid rgba(200, 160, 110, 0.15);
+            padding: 14px 16px 20px;
+            z-index: 16;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #music-player.visible {
+            transform: translateY(0);
+        }
+
+        #player-artist-name {
+            color: #c8a06e;
+            font-size: 13px;
+            margin-bottom: 10px;
+            padding-right: 30px;
+            line-height: 1.3;
+        }
+
+        #player-close {
+            position: absolute;
+            top: 10px; right: 12px;
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 2px 6px;
+            line-height: 1;
+            transition: color 0.2s ease;
+            z-index: 2;
+        }
+        #player-close:active { color: #c8a06e; }
+
+        /* Переопределяем inline-стили, которые Apple Music вшивает в свой iframe */
+        #player-content iframe {
+            width: 100% !important;
+            max-width: 100% !important;
+            height: 152px !important;
+            border: none !important;
+            border-radius: 8px !important;
+            overflow: hidden !important;
+            display: block !important;
+        }
+
+        #player-content audio {
+            width: 100%;
+            height: 40px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div id="room-bg"></div>
+    <div id="hotspots-container"></div>
+</div>
+
+<div id="dialog-box">
+    <div id="dialog-text"></div>
+    <button id="dialog-btn">Продолжить</button>
+</div>
+
+<div id="music-shelf" class="hidden">
+    <div id="shelf-track"></div>
+</div>
+
+<div id="music-player">
+    <div id="player-artist-name"></div>
+    <button id="player-close">&times;</button>
+    <div id="player-content"></div>
+</div>
+
+<div id="back-btn">&larr;</div>
+<div id="hint">нажимай на светящиеся точки</div>
+
+<script>
+const ROOMS = {
+
+    hub: {
+        bg: 'https://i.postimg.cc/5tJmjVRc/Gemini-Generated-Image-6c01m86c01m86c01.png',
+        dialogues: [
+            {
+                text: 'Привет! Рад, что тебе стало интересно. Это место — дополнение к моему профилю. Мне хотелось рассказать про себя немного более развёрнуто, чем это позволяет приложение.',
+                btn: 'Продолжить'
+            },
+            {
+                text: 'Перед тобой комната. Нажимай на подсвеченные предметы, чтобы узнать, чем я живу, какая у меня история или чем я увлекаюсь.',
+                btn: 'Продолжить'
+            },
+            {
+                text: 'Если тебе захочется познакомиться — ты можешь написать мне в телеграм или оставить свой контакт, и я напишу тебе сам. Ещё можно поставить лайк в приложении, только у меня нет премиума, и это может быть не очень надёжно.',
+                btn: 'Посмотреть комнату'
+            }
+        ],
+        hotspots: [
+            { x: 22, y: 32, size: 52, target: 'books'  },
+            { x: 52, y: 22, size: 52, target: 'games'  },
+            { x: 78, y: 40, size: 52, target: 'music'  },
+            { x: 30, y: 62, size: 52, target: 'dreams' },
+            { x: 68, y: 68, size: 52, target: 'views'  }
+        ]
+    },
+
+    books: {
+        bg: 'linear-gradient(145deg, #12141e 0%, #1a1e30 50%, #10131f 100%)',
+        dialogues: [
+            {
+                text: 'Здесь напишите про книги, которые читаете. Что последнее прочитали, что повлияло, что перечитываете.',
+                btn: 'Далее'
+            },
+            {
+                text: 'Второй абзац — например, про любимого автора или жанр, к которому возвращаетесь.',
+                btn: 'Понятно'
+            }
+        ],
+        hotspots: []
+    },
+
+    games: {
+        bg: 'linear-gradient(145deg, #1a1210 0%, #261a15 50%, #1a1210 100%)',
+        dialogues: [
+            {
+                text: 'Здесь — про любимые игры или фильмы. Можно упомянуть конкретные тайтлы и почему они важны для вас.',
+                btn: 'Понятно'
+            }
+        ],
+        hotspots: []
+    },
+
+    music: {
+        bg: 'https://i.postimg.cc/jqWRdwn7/Comfy-UI-00091.png',
+        dialogues: [
+            {
+                text: 'Эта комната своего рода саундтрек ко мне) Здесь ты можешь посмотреть какую я слушаю музыку.',
+                btn: 'Продолжить'
+            },
+            {
+                text: 'Список не исчерпывающий, зато ты можешь послушать отрывки прямо тут.',
+                btn: 'Не надо лишних слов'
+            }
+        ],
+        shelf: [
+            {
+                cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/30/80/f8/3080f89f-283c-7182-8d4e-fdddf5d54fec/cover.jpg/316x316bb.webp',
+                artist: 'Mirele',
+                track: 'Жертвоприношение',
+                embed: '<iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="175" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/ru/song/%D0%B6%D0%B5%D1%80%D1%82%D0%B2%D0%BE%D0%BF%D1%80%D0%B8%D0%BD%D0%BE%D1%88%D0%B5%D0%BD%D0%B8%D0%B5/1742996858"></iframe>'
+            },
+            {
+                cover: 'https://is1-ssl.mzstatic.com/image/thumb/Video125/v4/2f/8d/8a/2f8d8a1a-9bf0-a16f-f7fe-36fd1ea9a304/Job8c9725e3-cb20-4cb4-b5a0-9f857c913c7e-113823508-PreviewImage_preview_image_nonvideo_sdr-Time1621272062755.png/316x316bb.webp',
+                artist: 'TOOL',
+                track: 'Название трека',
+                embed: '<iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="175" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/ru/song/schism/1474185654"></iframe>'
+            },
+            {
+                cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/5b/b8/00/5bb80093-db7e-fdb9-c4ce-48f81847f68b/mzi.jwcepubj.jpg/316x316bb.webp',
+                artist: 'Aphex twin',
+                track: 'Название трека',
+                embed: '<iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="175" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/ru/song/xtal/1668862649"></iframe>'
+            },
+            {
+                cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/05/12/64/05126407-a371-8fa9-9429-0e0b60deebcb/mzi.jqdlqldj.jpg/316x316bb.webp',
+                artist: 'type o negative',
+                track: 'Название трека',
+                embed: '<iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="175" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/ru/song/love-you-to-death/299826868"></iframe>'
+            },
+            {
+                cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/e1/0e/28/e10e28c1-bed6-3143-cb91-265ba590bc35/15UMGIM65435.rgb.jpg/316x316bb.webp',
+                artist: 'Roy Ayers',
+                track: 'Название трека',
+                embed: '<iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="175" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/ru/song/the-third-eye/1469585195"></iframe>'
+            },
+            {
+                cover: 'https://is1-ssl.mzstatic.com/image/thumb/Video116/v4/b5/0a/54/b50a545f-b1d5-5ef0-8db5-3c5f81059fc1/Job1f467e72-4bda-404b-ab58-d69b6c33f78d-126024009-PreviewImage_preview_image_nonvideo_sdr-Time1637264880420.png/316x316bb.webp',
+                artist: 'Childish Gambino',
+                track: 'Название трека',
+                embed: '<iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="175" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/ru/song/redbone/1771719595"></iframe>'
+            }
+        ],
+        hotspots: []
+    },
+
+    dreams: {
+        bg: 'linear-gradient(145deg, #16140e 0%, #201e14 50%, #16140e 100%)',
+        dialogues: [
+            {
+                text: 'О чём мечтаете, какие планы, куда хотите поехать или чем хотите заняться. Искренне и по-настоящему.',
+                btn: 'Понятно'
+            }
+        ],
+        hotspots: []
+    },
+
+    views: {
+        bg: 'linear-gradient(145deg, #10101a 0%, #16162a 50%, #10101a 100%)',
+        dialogues: [
+            {
+                text: 'Ваши взгляды — на отношения, на работу, на то, что важно, а что нет. То, что помогает понять, совпадёте ли вы с человеком.',
+                btn: 'Понятно'
+            }
+        ],
+        hotspots: []
+    }
+};
+
+
+const app          = document.getElementById('app');
+const roomBg       = document.getElementById('room-bg');
+const dialogBox    = document.getElementById('dialog-box');
+const dialogText   = document.getElementById('dialog-text');
+const dialogBtn    = document.getElementById('dialog-btn');
+const hotspotsEl   = document.getElementById('hotspots-container');
+const backBtn      = document.getElementById('back-btn');
+const hintEl       = document.getElementById('hint');
+const musicShelf   = document.getElementById('music-shelf');
+const shelfTrack   = document.getElementById('shelf-track');
+const musicPlayer  = document.getElementById('music-player');
+const playerArtist = document.getElementById('player-artist-name');
+const playerClose  = document.getElementById('player-close');
+const playerContent= document.getElementById('player-content');
+
+let currentRoom      = null;
+let dialogueIndex    = 0;
+let typeTimer        = null;
+let typeDone         = false;
+let fullText         = '';
+let isReturnMode     = false;
+let isTransitioning  = false;
+let history          = [];
+let completedRooms   = new Set();
+
+const TYPE_SPEED = 28;
+
+
+function loadRoom(roomId, addToHistory) {
+    if (isTransitioning) return;
+    const room = ROOMS[roomId];
+    if (!room) return;
+
+    if (addToHistory && currentRoom) {
+        history.push(currentRoom);
+    }
+
+    isTransitioning = true;
+    app.classList.add('fading');
+
+    setTimeout(() => {
+        currentRoom   = roomId;
+        dialogueIndex = 0;
+        isReturnMode  = false;
+
+        if (room.bg.startsWith('linear') || room.bg.startsWith('radial') || room.bg.startsWith('#')) {
+            roomBg.style.backgroundImage = 'none';
+            roomBg.style.background = room.bg;
+        } else {
+            roomBg.style.background = '';
+            roomBg.style.backgroundImage = 'url(\'' + room.bg + '\')';
+        }
+        roomBg.style.backgroundSize = 'cover';
+        roomBg.style.backgroundPosition = 'center';
+
+        hotspotsEl.innerHTML = '';
+        hintEl.classList.remove('visible');
+        musicShelf.classList.add('hidden');
+        closePlayer();
+
+        backBtn.classList.toggle('visible', roomId !== 'hub');
+
+        if (completedRooms.has(roomId)) {
+            dialogBox.classList.add('hidden');
+            if (room.shelf && room.shelf.length > 0) {
+                showShelf(room);
+            } else {
+                showHotspots(room);
+            }
+        } else if (room.dialogues && room.dialogues.length > 0) {
+            showDialogue();
+        } else {
+            dialogBox.classList.add('hidden');
+            if (room.shelf && room.shelf.length > 0) {
+                showShelf(room);
+            } else {
+                showHotspots(room);
+            }
+            completedRooms.add(roomId);
+        }
+
+        app.classList.remove('fading');
+        isTransitioning = false;
+    }, 460);
+}
+
+
+function showDialogue() {
+    const room = ROOMS[currentRoom];
+    const d = room.dialogues[dialogueIndex];
+
+    if (!d) {
+        completedRooms.add(currentRoom);
+
+        if (room.hotspots && room.hotspots.length > 0) {
+            dialogBox.classList.add('hidden');
+            showHotspots(room);
+        } else if (room.shelf && room.shelf.length > 0) {
+            dialogBox.classList.add('hidden');
+            showShelf(room);
+        } else {
+            dialogText.textContent = '';
+            dialogBtn.textContent = '\u2190 Назад';
+            isReturnMode = true;
+        }
+        return;
+    }
+
+    isReturnMode = false;
+    dialogBox.classList.remove('hidden');
+    fullText = d.text;
+    typeDone = false;
+    dialogBtn.textContent = d.btn;
+    startTypewriter(fullText);
+}
+
+
+function startTypewriter(text) {
+    clearInterval(typeTimer);
+    dialogText.textContent = '';
+    let i = 0;
+    typeTimer = setInterval(() => {
+        if (i < text.length) {
+            dialogText.textContent += text[i];
+            i++;
+        } else {
+            clearInterval(typeTimer);
+            typeDone = true;
+        }
+    }, TYPE_SPEED);
+}
+
+function skipTypewriter() {
+    clearInterval(typeTimer);
+    dialogText.textContent = fullText;
+    typeDone = true;
+}
+
+
+function showHotspots(room) {
+    if (!room.hotspots || room.hotspots.length === 0) return;
+
+    room.hotspots.forEach(h => {
+        const el = document.createElement('div');
+        el.className = 'hotspot';
+        el.style.left   = h.x + '%';
+        el.style.top    = h.y + '%';
+        el.style.width  = h.size + 'px';
+        el.style.height = h.size + 'px';
+
+        el.innerHTML =
+            '<div class="hotspot-glow"></div>' +
+            '<div class="hotspot-ring"></div>' +
+            '<div class="hotspot-ring"></div>' +
+            '<div class="hotspot-dot"></div>';
+
+        el.addEventListener('click', () => loadRoom(h.target, true));
+        hotspotsEl.appendChild(el);
+    });
+
+    if (currentRoom === 'hub') {
+        hintEl.classList.add('visible');
+    }
+}
+
+
+function showShelf(room) {
+    shelfTrack.innerHTML = '';
+
+    room.shelf.forEach((item, i) => {
+        const card = document.createElement('div');
+        card.className = 'shelf-card';
+
+        let trackNameHTML = '';
+        if (item.track) {
+            trackNameHTML = '<div class="shelf-track-name">' + item.track + '</div>';
+        }
+
+        card.innerHTML =
+            '<div class="shelf-cover" style="background-image:url(\'' + item.cover + '\')"></div>' +
+            '<div class="shelf-artist">' + item.artist + '</div>' +
+            trackNameHTML;
+
+        card.addEventListener('click', () => openPlayer(item, i));
+        shelfTrack.appendChild(card);
+    });
+
+    musicShelf.classList.remove('hidden');
+}
+
+
+function openPlayer(item, index) {
+    document.querySelectorAll('.shelf-card').forEach((c, i) => {
+        c.classList.toggle('active', i === index);
+    });
+
+    let label = item.artist;
+    if (item.track) label += ' \u2014 ' + item.track;
+    playerArtist.textContent = label;
+
+    if (item.mp3) {
+        playerContent.innerHTML =
+            '<audio controls src="' + item.mp3 + '" preload="none"></audio>';
+    } else if (item.embed && item.embed.trim().charAt(0) === '<') {
+        playerContent.innerHTML = item.embed;
+    } else if (item.embed) {
+        playerContent.innerHTML =
+            '<iframe src="' + item.embed + '" allow="autoplay" loading="lazy"></iframe>';
+    }
+
+    musicPlayer.classList.add('visible');
+}
+
+function closePlayer() {
+    musicPlayer.classList.remove('visible');
+    playerContent.innerHTML = '';
+    document.querySelectorAll('.shelf-card').forEach(c => c.classList.remove('active'));
+}
+
+
+dialogText.addEventListener('click', (e) => {
+    if (!typeDone) {
+        e.stopPropagation();
+        skipTypewriter();
+    }
+});
+
+dialogBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!typeDone) { skipTypewriter(); return; }
+
+    if (isReturnMode) {
+        if (history.length > 0) loadRoom(history.pop(), false);
+        return;
+    }
+
+    dialogueIndex++;
+    showDialogue();
+});
+
+backBtn.addEventListener('click', () => {
+    if (history.length > 0) loadRoom(history.pop(), false);
+});
+
+playerClose.addEventListener('click', closePlayer);
+
+
+loadRoom('hub', false);
+</script>
+</body>
+</html>
