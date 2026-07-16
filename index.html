@@ -37,10 +37,10 @@
         .hotspot:active{transform:translate(-50%,-50%) scale(.85)}
         .hotspot-glow{position:absolute;inset:-40%;border-radius:50%;background:radial-gradient(circle,rgba(200,160,110,.25),transparent 70%);animation:glowP 2.2s ease-in-out infinite}
         @keyframes glowP{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.15)}}
-        .hotspot-ring{position:absolute;inset:-20%;border-radius:50%;border:1.5px solid rgba(200,160,110,.45);animation:ringE 2.2s ease-out infinite}
+        .hotspot-ring{position:absolute;inset:-20%;border-radius:50%;border:1.5px solid rgba(39, 175, 73, 0.45);animation:ringE 2.2s ease-out infinite}
         .hotspot-ring:nth-child(2){animation-delay:.75s}
         @keyframes ringE{0%{transform:scale(.4);opacity:.9}100%{transform:scale(2);opacity:0}}
-        .hotspot-dot{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:7px;height:7px;border-radius:50%;background:#c8a06e;box-shadow:0 0 10px rgba(200,160,110,.7),0 0 25px rgba(200,160,110,.25)}
+        .hotspot-dot{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:7px;height:7px;border-radius:50%;background:#34ba36;box-shadow:0 0 10px rgba(200,160,110,.7),0 0 25px rgba(200,160,110,.25)}
 
         #back-btn{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:14px;width:38px;height:38px;border-radius:50%;background:rgba(8,8,8,.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.08);color:#d8d0c6;font-size:17px;display:none;align-items:center;justify-content:center;cursor:pointer;z-index:20;transition:background .2s ease,transform .15s ease;line-height:1}
         #back-btn:active{background:rgba(8,8,8,.8);transform:scale(.9)}
@@ -63,13 +63,32 @@
         .shelf-track-name{margin-top:2px;font-size:10.5px;color:rgba(192,184,172,.5);text-align:center;font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
         /* ===== Плеер ===== */
-        #music-player{position:fixed;bottom:0;left:0;right:0;background:rgba(12,12,12,.97);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid rgba(200,160,110,.15);padding:14px 16px calc(99px + env(safe-area-inset-bottom,0px));z-index:16;transform:translateY(100%);transition:transform .4s cubic-bezier(.4,0,.2,1)}
+        #music-player{
+            position:fixed;bottom:0;left:0;right:0;
+            background:rgba(12,12,12,.97);
+            backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+            border-top:1px solid rgba(200,160,110,.15);
+            padding:14px 16px calc(16px + env(safe-area-inset-bottom,0px));
+            z-index:16;
+            transform:translateY(100%);
+            transition:transform .4s cubic-bezier(.4,0,.2,1);
+            /* Прокрутка на случай очень маленького экрана */
+            max-height:calc(100dvh - 40px);
+            overflow-y:auto;
+            scrollbar-width:none;
+        }
+        #music-player::-webkit-scrollbar{display:none}
         #music-player.visible{transform:translateY(0)}
         #player-artist-name{color:#c8a06e;font-size:13px;margin-bottom:10px;padding-right:30px;line-height:1.3}
-        #player-close{position:absolute;top:10px;right:12px;background:none;border:none;color:#666;font-size:24px;cursor:pointer;padding:2px 6px;line-height:1;transition:color .2s ease;z-index:2}
+        #player-close{position:sticky;top:0;float:right;background:none;border:none;color:#666;font-size:24px;cursor:pointer;padding:2px 6px;line-height:1;transition:color .2s ease;z-index:2}
         #player-close:active{color:#c8a06e}
-        #player-content{position:relative;min-height:80px}
-        #player-content iframe{width:100%!important;max-width:100%!important;height:180px!important;border:none!important;border-radius:8px!important;overflow:hidden!important;display:block!important}
+        #player-content{position:relative;min-height:60px}
+        /* Базовый стиль iframe — конкретная высота задаётся динамически в JS */
+        #player-content iframe{
+            width:100%!important;max-width:100%!important;
+            border:none!important;border-radius:8px!important;
+            overflow:hidden!important;display:block!important;
+        }
         #player-content audio{width:100%;height:40px;border-radius:8px}
         .player-spinner{display:flex;align-items:center;justify-content:center;height:80px;gap:10px;color:rgba(200,160,110,.5);font-size:12.5px}
         .player-spinner::before{content:'';width:20px;height:20px;border:2px solid rgba(200,160,110,.15);border-top-color:rgba(200,160,110,.7);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
@@ -134,8 +153,8 @@
 <div id="music-shelf" class="hidden"><div id="shelf-track"></div></div>
 
 <div id="music-player">
-    <div id="player-artist-name"></div>
     <button id="player-close">&times;</button>
+    <div id="player-artist-name"></div>
     <div id="player-content"></div>
 </div>
 
@@ -223,19 +242,6 @@ const ROOMS = {
         hotspots: []
     },
 
-    // ——— Музыка ———
-    //  Каждый трек теперь имеет ДВА embed:
-    //    embed_ru   — для России (СберЗвук)
-    //    embed_intl — для остальных стран (Apple Music / Яндекс)
-    //
-    //  Формат любой — как и раньше:
-    //    • Полный HTML-код iframe (скопированный из сервиса)
-    //    • Или просто ссылка (будет обёрнута в iframe)
-    //
-    //  Автоопределение: при загрузке страницы пробуем достучаться
-    //  до zvuk.com. Если доступен — используем embed_ru,
-    //  если нет — embed_intl.
-    //
     music: {
         bg: 'https://i.postimg.cc/jqWRdwn7/Comfy-UI-00091.png',
         dialogues: [
@@ -254,9 +260,7 @@ const ROOMS = {
                 cover: 'https://picsum.photos/seed/track02/260/260',
                 artist: 'Исполнитель 2',
                 track: 'Название трека',
-                // Ссылка на трек в СберЗвук (найдите на zvuk.com → Поделиться → Код для встраивания)
                 embed_ru: 'https://zvuk.com/embed/track?id=TRACK_ID',
-                // Apple Music или Яндекс Музыка — ссылка или полный iframe
                 embed_intl: 'https://music.yandex.ru/iframe/#track/TRACK_ID/ALBUM_ID'
             },
             {
@@ -320,9 +324,6 @@ const ROOMS = {
 
 // ═══════════════════════════════════════════════════════════════
 //  ОПРЕДЕЛЕНИЕ РЕГИОНА
-//  Пробуем загрузить favicon с zvuk.com.
-//  Если загрузилось — мы в России (или VPN на РФ) → СберЗвук.
-//  Если ошибка или таймаут 3с — международный → Apple Music.
 // ═══════════════════════════════════════════════════════════════
 
 let detectedRegion = null;
@@ -330,23 +331,16 @@ let regionPromise  = null;
 
 function detectRegion() {
     if (regionPromise) return regionPromise;
-
     regionPromise = new Promise(resolve => {
         const img = new Image();
-        const timer = setTimeout(() => {
-            img.src = '';
-            resolve('intl');
-        }, 3000);
-
+        const timer = setTimeout(() => { img.src = ''; resolve('intl'); }, 3000);
         img.onload = () => { clearTimeout(timer); resolve('ru'); };
         img.onerror = () => { clearTimeout(timer); resolve('intl'); };
         img.src = 'https://zvuk.com/favicon.ico?_d=' + Date.now();
     });
-
     return regionPromise;
 }
 
-// Запускаем определение сразу при загрузке
 detectRegion().then(r => { detectedRegion = r; });
 
 
@@ -481,24 +475,19 @@ function showShelf(room) {
 }
 
 
-// ——— Плеер с выбором источника по региону ———
+// ——— Плеер с динамической высотой ———
 async function openPlayer(item, index) {
     document.querySelectorAll('.shelf-card').forEach((c, i) => c.classList.toggle('active', i === index));
     let label = item.artist; if (item.track) label += ' \u2014 ' + item.track; playerArtist.textContent = label;
 
-    // Если регион ещё не определён — ждём результат (максимум 3с)
-    if (!detectedRegion) {
-        detectedRegion = await detectRegion();
-    }
+    if (!detectedRegion) detectedRegion = await detectRegion();
 
-    // Выбираем нужный embed: Россия → СберЗвук, остальные → Apple Music / Яндекс
     let embedCode;
     if (detectedRegion === 'ru' && item.embed_ru) {
         embedCode = item.embed_ru;
     } else if (item.embed_intl) {
         embedCode = item.embed_intl;
     } else {
-        // Фолбэк: если указан только один embed (совместимость со старым форматом)
         embedCode = item.embed;
     }
 
@@ -516,7 +505,24 @@ async function openPlayer(item, index) {
         } else {
             iframeEl = document.createElement('iframe'); iframeEl.src = embedCode; iframeEl.allow = 'autoplay'; iframeEl.setAttribute('loading','lazy');
         }
-        iframeEl.style.cssText = 'width:100%!important;max-width:100%!important;height:180px!important;border:none!important;border-radius:8px!important;overflow:hidden!important;display:block!important;opacity:0;position:absolute;top:0;left:0;transition:opacity .35s ease;';
+
+        // Определяем нужную высоту по домену источника
+        let height = '152px'; // дефолт для Apple Music
+        const src = (iframeEl.getAttribute('src') || '').toLowerCase();
+        if (src.includes('zvuk.com')) {
+            height = '240px';   // СберЗвук самый высокий
+        } else if (src.includes('yandex')) {
+            height = '80px';    // Яндекс Музыка компактный
+        }
+
+        iframeEl.style.cssText =
+            'width:100%!important;max-width:100%!important;' +
+            'height:'+height+'!important;' +
+            'border:none!important;border-radius:8px!important;' +
+            'overflow:hidden!important;display:block!important;' +
+            'opacity:0;position:absolute;top:0;left:0;' +
+            'transition:opacity .35s ease;';
+
         playerContent.appendChild(iframeEl);
 
         let revealed = false;
@@ -530,7 +536,12 @@ async function openPlayer(item, index) {
     }
 }
 
-function closePlayer() { musicPlayer.classList.remove('visible'); playerContent.innerHTML = ''; document.querySelectorAll('.shelf-card').forEach(c => c.classList.remove('active')); }
+function closePlayer() {
+    musicPlayer.classList.remove('visible');
+    musicPlayer.scrollTop = 0;
+    playerContent.innerHTML = '';
+    document.querySelectorAll('.shelf-card').forEach(c => c.classList.remove('active'));
+}
 
 function showBooksGrid(room) {
     booksGrid.innerHTML = '';
