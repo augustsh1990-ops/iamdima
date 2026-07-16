@@ -2,336 +2,121 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Моя комната</title>
     <link href="https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        html,body{overflow:hidden;width:100%;height:100dvh;font-family:'PT Serif',Georgia,serif;background:#0a0a0a;touch-action:manipulation;
+            padding-bottom:env(safe-area-inset-bottom,0px);
         }
 
-        html, body {
-            overflow: hidden;
-            width: 100%;
-            height: 100dvh;
-            font-family: 'PT Serif', Georgia, serif;
-            background: #0a0a0a;
-            touch-action: manipulation;
-        }
+        #app{position:relative;width:100%;height:100%;transition:opacity .45s ease}
+        #app.fading{opacity:0}
 
-        #app {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            transition: opacity 0.45s ease;
-        }
-        #app.fading { opacity: 0; }
+        #room-bg{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat}
+        #room-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.1) 0%,rgba(0,0,0,0) 35%,rgba(0,0,0,.05) 55%,rgba(0,0,0,.55) 100%);pointer-events:none}
 
-        #room-bg {
-            position: absolute;
-            inset: 0;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+        #dialog-box{
+            position:fixed;bottom:0;left:0;right:0;
+            padding:20px 20px calc(24px + env(safe-area-inset-bottom,0px));
+            background:linear-gradient(to bottom,rgba(8,8,8,.82),rgba(8,8,8,.95));
+            backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+            border-top:1px solid rgba(200,160,110,.15);
+            max-height:55dvh;overflow-y:auto;scrollbar-width:none;
+            display:flex;flex-direction:column;justify-content:flex-end;
+            transition:transform .5s cubic-bezier(.4,0,.2,1),opacity .5s ease;z-index:10;
         }
-        #room-bg::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(
-                to bottom,
-                rgba(0,0,0,0.1) 0%,
-                rgba(0,0,0,0) 35%,
-                rgba(0,0,0,0.05) 55%,
-                rgba(0,0,0,0.55) 100%
-            );
-            pointer-events: none;
-        }
+        #dialog-box::-webkit-scrollbar{display:none}
+        #dialog-box.hidden{transform:translateY(100%);opacity:0;pointer-events:none}
+        #dialog-text{color:#e4dcd2;font-size:15.5px;line-height:1.75;margin-bottom:14px;min-height:40px;cursor:pointer;user-select:none}
+        #dialog-btn{flex-shrink:0;align-self:flex-end;padding:9px 26px;background:rgba(200,160,110,.12);border:1px solid rgba(200,160,110,.35);color:#c8a06e;font-family:'PT Serif',Georgia,serif;font-size:13.5px;border-radius:8px;cursor:pointer;transition:background .2s ease,transform .15s ease;letter-spacing:.3px}
+        #dialog-btn:active{background:rgba(200,160,110,.28);transform:scale(.95)}
 
-        #dialog-box {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 22px 20px 30px;
-            background: linear-gradient(
-                to bottom,
-                rgba(8, 8, 8, 0.82) 0%,
-                rgba(8, 8, 8, 0.95) 100%
-            );
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border-top: 1px solid rgba(200, 160, 110, 0.15);
-            min-height: 170px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-                        opacity 0.5s ease;
-            z-index: 10;
-        }
-        #dialog-box.hidden {
-            transform: translateY(100%);
-            opacity: 0;
-            pointer-events: none;
-        }
+        .hotspot{position:absolute;transform:translate(-50%,-50%);z-index:5;cursor:pointer}
+        .hotspot:active{transform:translate(-50%,-50%) scale(.85)}
+        .hotspot-glow{position:absolute;inset:-40%;border-radius:50%;background:radial-gradient(circle,rgba(200,160,110,.25),transparent 70%);animation:glowP 2.2s ease-in-out infinite}
+        @keyframes glowP{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.15)}}
+        .hotspot-ring{position:absolute;inset:-20%;border-radius:50%;border:1.5px solid rgba(200,160,110,.45);animation:ringE 2.2s ease-out infinite}
+        .hotspot-ring:nth-child(2){animation-delay:.75s}
+        @keyframes ringE{0%{transform:scale(.4);opacity:.9}100%{transform:scale(2);opacity:0}}
+        .hotspot-dot{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:7px;height:7px;border-radius:50%;background:#c8a06e;box-shadow:0 0 10px rgba(200,160,110,.7),0 0 25px rgba(200,160,110,.25)}
 
-        #dialog-text {
-            color: #e4dcd2;
-            font-size: 15.5px;
-            line-height: 1.75;
-            margin-bottom: 18px;
-            min-height: 55px;
-            cursor: pointer;
-            user-select: none;
-        }
+        #back-btn{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:14px;width:38px;height:38px;border-radius:50%;background:rgba(8,8,8,.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.08);color:#d8d0c6;font-size:17px;display:none;align-items:center;justify-content:center;cursor:pointer;z-index:20;transition:background .2s ease,transform .15s ease;line-height:1}
+        #back-btn:active{background:rgba(8,8,8,.8);transform:scale(.9)}
+        #back-btn.visible{display:flex}
 
-        #dialog-btn {
-            align-self: flex-end;
-            padding: 9px 26px;
-            background: rgba(200, 160, 110, 0.12);
-            border: 1px solid rgba(200, 160, 110, 0.35);
-            color: #c8a06e;
-            font-family: 'PT Serif', Georgia, serif;
-            font-size: 13.5px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.2s ease, transform 0.15s ease;
-            letter-spacing: 0.3px;
-        }
-        #dialog-btn:active {
-            background: rgba(200, 160, 110, 0.28);
-            transform: scale(0.95);
-        }
+        #hint{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);color:rgba(228,220,210,.35);font-size:11.5px;letter-spacing:1.2px;z-index:6;pointer-events:none;display:none;animation:hintB 3.5s ease-in-out infinite;white-space:nowrap}
+        #hint.visible{display:block}
+        @keyframes hintB{0%,100%{opacity:.25}50%{opacity:.55}}
 
-        .hotspot {
-            position: absolute;
-            transform: translate(-50%, -50%);
-            z-index: 5;
-            cursor: pointer;
-        }
-        .hotspot:active { transform: translate(-50%, -50%) scale(0.85); }
+        /* ===== Музыкальная полка ===== */
+        #music-shelf{position:fixed;bottom:0;left:0;right:0;padding:18px 0 calc(26px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,rgba(8,8,8,.94),rgba(8,8,8,.82) 65%,transparent);z-index:10;transition:transform .5s cubic-bezier(.4,0,.2,1),opacity .5s ease}
+        #music-shelf.hidden{transform:translateY(100%);opacity:0;pointer-events:none}
+        #shelf-track{display:flex;gap:14px;overflow-x:auto;padding:0 20px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;touch-action:pan-x;scrollbar-width:none}
+        #shelf-track::-webkit-scrollbar{display:none}
+        .shelf-card{flex-shrink:0;width:115px;scroll-snap-align:start;cursor:pointer;transition:transform .2s ease}
+        .shelf-card:active{transform:scale(.94)}
+        .shelf-cover{width:115px;height:115px;border-radius:10px;background-size:cover;background-position:center;border:2px solid transparent;transition:border-color .3s ease,box-shadow .3s ease;box-shadow:0 4px 18px rgba(0,0,0,.45)}
+        .shelf-card.active .shelf-cover{border-color:#c8a06e;box-shadow:0 4px 18px rgba(0,0,0,.45),0 0 16px rgba(200,160,110,.2)}
+        .shelf-artist{margin-top:8px;font-size:11.5px;color:#c0b8ac;text-align:center;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .shelf-track-name{margin-top:2px;font-size:10.5px;color:rgba(192,184,172,.5);text-align:center;font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-        .hotspot-glow {
-            position: absolute;
-            inset: -40%;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(200,160,110,0.25) 0%, transparent 70%);
-            animation: glowPulse 2.2s ease-in-out infinite;
-        }
-        @keyframes glowPulse {
-            0%, 100% { opacity: 0.5; transform: scale(1); }
-            50%      { opacity: 1;   transform: scale(1.15); }
-        }
+        /* ===== Плеер ===== */
+        #music-player{position:fixed;bottom:0;left:0;right:0;background:rgba(12,12,12,.97);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid rgba(200,160,110,.15);padding:14px 16px calc(20px + env(safe-area-inset-bottom,0px));z-index:16;transform:translateY(100%);transition:transform .4s cubic-bezier(.4,0,.2,1)}
+        #music-player.visible{transform:translateY(0)}
+        #player-artist-name{color:#c8a06e;font-size:13px;margin-bottom:10px;padding-right:30px;line-height:1.3}
+        #player-close{position:absolute;top:10px;right:12px;background:none;border:none;color:#666;font-size:24px;cursor:pointer;padding:2px 6px;line-height:1;transition:color .2s ease;z-index:2}
+        #player-close:active{color:#c8a06e}
+        #player-content{position:relative;min-height:80px}
+        #player-content iframe{width:100%!important;max-width:100%!important;height:180px!important;border:none!important;border-radius:8px!important;overflow:hidden!important;display:block!important}
+        #player-content audio{width:100%;height:40px;border-radius:8px}
+        .player-spinner{display:flex;align-items:center;justify-content:center;height:80px;gap:10px;color:rgba(200,160,110,.5);font-size:12.5px}
+        .player-spinner::before{content:'';width:20px;height:20px;border:2px solid rgba(200,160,110,.15);border-top-color:rgba(200,160,110,.7);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
+        @keyframes spin{to{transform:rotate(360deg)}}
 
-        .hotspot-ring {
-            position: absolute;
-            inset: -20%;
-            border-radius: 50%;
-            border: 1.5px solid rgba(200, 160, 110, 0.45);
-            animation: ringExpand 2.2s ease-out infinite;
-        }
-        .hotspot-ring:nth-child(2) { animation-delay: 0.75s; }
-        @keyframes ringExpand {
-            0%   { transform: scale(0.4); opacity: 0.9; }
-            100% { transform: scale(2);   opacity: 0; }
-        }
+        /* ===== Сетка книг ===== */
+        #books-grid-wrap{position:fixed;bottom:0;left:0;right:0;padding:16px 16px calc(28px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,rgba(8,8,8,.96),rgba(8,8,8,.88) 70%,transparent);z-index:10;transition:transform .5s cubic-bezier(.4,0,.2,1),opacity .5s ease;max-height:65dvh;overflow-y:auto;scrollbar-width:none}
+        #books-grid-wrap::-webkit-scrollbar{display:none}
+        #books-grid-wrap.hidden{transform:translateY(100%);opacity:0;pointer-events:none}
+        #books-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+        .book-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:14px 12px 12px;cursor:pointer;transition:background .2s ease,border-color .2s ease,transform .15s ease;display:flex;flex-direction:column;min-height:90px}
+        .book-card:active{background:rgba(200,160,110,.08);border-color:rgba(200,160,110,.2);transform:scale(.97)}
+        .book-card-title{color:#e4dcd2;font-size:13px;font-weight:700;line-height:1.3;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+        .book-card-author{color:rgba(200,160,110,.6);font-size:11px;font-style:italic;line-height:1.25}
 
-        .hotspot-dot {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 7px; height: 7px;
-            border-radius: 50%;
-            background: #c8a06e;
-            box-shadow: 0 0 10px rgba(200, 160, 110, 0.7),
-                        0 0 25px rgba(200, 160, 110, 0.25);
-        }
+        /* ===== Модалка книги ===== */
+        #book-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:30;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s ease;padding-bottom:env(safe-area-inset-bottom,0px)}
+        #book-modal-overlay.visible{opacity:1;pointer-events:auto}
+        #book-modal{width:100%;max-height:75dvh;background:linear-gradient(to bottom,rgba(18,18,18,.98),rgba(12,12,12,.99));border-top:1px solid rgba(200,160,110,.2);border-radius:18px 18px 0 0;padding:12px 22px 32px;overflow-y:auto;scrollbar-width:none;transform:translateY(100%);transition:transform .4s cubic-bezier(.4,0,.2,1)}
+        #book-modal::-webkit-scrollbar{display:none}
+        #book-modal-overlay.visible #book-modal{transform:translateY(0)}
+        #book-modal::before{content:'';display:block;width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.15);margin:0 auto 16px}
+        .modal-book-title{color:#c8a06e;font-size:18px;font-weight:700;line-height:1.35;margin-bottom:4px}
+        .modal-book-author{color:rgba(200,160,110,.55);font-size:13px;font-style:italic;margin-bottom:18px}
+        .modal-book-text{color:#d5cec4;font-size:14.5px;line-height:1.8}
 
-        #back-btn {
-            position: fixed;
-            top: 14px; left: 14px;
-            width: 38px; height: 38px;
-            border-radius: 50%;
-            background: rgba(8, 8, 8, 0.55);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,0.08);
-            color: #d8d0c6;
-            font-size: 17px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 20;
-            transition: background 0.2s ease, transform 0.15s ease;
-            line-height: 1;
-        }
-        #back-btn:active {
-            background: rgba(8, 8, 8, 0.8);
-            transform: scale(0.9);
-        }
-        #back-btn.visible { display: flex; }
-
-        #hint {
-            position: fixed;
-            bottom: 24px;
-            left: 50%; transform: translateX(-50%);
-            color: rgba(228, 220, 210, 0.35);
-            font-size: 11.5px;
-            letter-spacing: 1.2px;
-            z-index: 6;
-            pointer-events: none;
-            display: none;
-            animation: hintBreath 3.5s ease-in-out infinite;
-            white-space: nowrap;
-        }
-        #hint.visible { display: block; }
-        @keyframes hintBreath {
-            0%, 100% { opacity: 0.25; }
-            50%      { opacity: 0.55; }
-        }
-
-        /* ========== Музыкальная полка ========== */
-        #music-shelf {
-            position: fixed;
-            bottom: 0;
-            left: 0; right: 0;
-            padding: 18px 0 26px;
-            background: linear-gradient(
-                to top,
-                rgba(8, 8, 8, 0.94) 0%,
-                rgba(8, 8, 8, 0.82) 65%,
-                transparent 100%
-            );
-            z-index: 10;
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-                        opacity 0.5s ease;
-        }
-        #music-shelf.hidden {
-            transform: translateY(100%);
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        #shelf-track {
-            display: flex;
-            gap: 14px;
-            overflow-x: auto;
-            padding: 0 20px;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-            touch-action: pan-x;
-            scrollbar-width: none;
-        }
-        #shelf-track::-webkit-scrollbar { display: none; }
-
-        .shelf-card {
-            flex-shrink: 0;
-            width: 115px;
-            scroll-snap-align: start;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-        .shelf-card:active { transform: scale(0.94); }
-
-        .shelf-cover {
-            width: 115px;
-            height: 115px;
-            border-radius: 10px;
-            background-size: cover;
-            background-position: center;
-            border: 2px solid transparent;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.45);
-        }
-        .shelf-card.active .shelf-cover {
-            border-color: #c8a06e;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.45),
-                        0 0 16px rgba(200, 160, 110, 0.2);
-        }
-
-        .shelf-artist {
-            margin-top: 8px;
-            font-size: 11.5px;
-            color: #c0b8ac;
-            text-align: center;
-            line-height: 1.25;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .shelf-track-name {
-            margin-top: 2px;
-            font-size: 10.5px;
-            color: rgba(192, 184, 172, 0.5);
-            text-align: center;
-            font-style: italic;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        /* ========== Встроенный плеер ========== */
-        #music-player {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: rgba(12, 12, 12, 0.97);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border-top: 1px solid rgba(200, 160, 110, 0.15);
-            padding: 14px 16px 20px;
-            z-index: 16;
-            transform: translateY(100%);
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        #music-player.visible {
-            transform: translateY(0);
-        }
-
-        #player-artist-name {
-            color: #c8a06e;
-            font-size: 13px;
-            margin-bottom: 10px;
-            padding-right: 30px;
-            line-height: 1.3;
-        }
-
-        #player-close {
-            position: absolute;
-            top: 10px; right: 12px;
-            background: none;
-            border: none;
-            color: #666;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 2px 6px;
-            line-height: 1;
-            transition: color 0.2s ease;
-            z-index: 2;
-        }
-        #player-close:active { color: #c8a06e; }
-
-        /* Переопределяем inline-стили, которые Apple Music вшивает в свой iframe */
-        #player-content iframe {
-            width: 100% !important;
-            max-width: 100% !important;
-            height: 152px !important;
-            border: none !important;
-            border-radius: 8px !important;
-            overflow: hidden !important;
-            display: block !important;
-        }
-
-        #player-content audio {
-            width: 100%;
-            height: 40px;
-            border-radius: 8px;
-        }
+        /* ===== Карусель ===== */
+        #carousel-wrap{position:fixed;bottom:0;left:0;right:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px);transition:transform .5s cubic-bezier(.4,0,.2,1),opacity .5s ease}
+        #carousel-wrap.hidden{transform:translateY(100%);opacity:0;pointer-events:none}
+        #carousel-stage{position:relative;width:min(220px,58vw);height:min(310px,44vh);flex-shrink:0}
+        .c-card{position:absolute;top:0;left:0;width:100%;height:100%;border-radius:12px;overflow:hidden;transition:transform .5s cubic-bezier(.25,.46,.45,.94),opacity .5s ease,filter .5s ease;will-change:transform,opacity;box-shadow:0 8px 30px rgba(0,0,0,.5);pointer-events:none}
+        .c-card img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;-webkit-user-drag:none}
+        .c-card.c-far-l{transform:translateX(-170%) scale(.5);opacity:0;filter:brightness(.35);z-index:1}
+        .c-card.c-left{transform:translateX(-72%) scale(.7);opacity:.4;filter:brightness(.5) saturate(.6);z-index:2}
+        .c-card.c-center{transform:translateX(0) scale(1);opacity:1;filter:brightness(1) saturate(1);z-index:4;pointer-events:auto;box-shadow:0 10px 40px rgba(0,0,0,.6),0 0 20px rgba(200,160,110,.06)}
+        .c-card.c-right{transform:translateX(72%) scale(.7);opacity:.4;filter:brightness(.5) saturate(.6);z-index:2}
+        .c-card.c-far-r{transform:translateX(170%) scale(.5);opacity:0;filter:brightness(.35);z-index:1}
+        #carousel-info{width:100%;padding:14px 24px 26px;text-align:center;position:relative;z-index:5;flex-shrink:0}
+        #carousel-info::before{content:'';position:absolute;bottom:0;left:0;right:0;height:90px;background:linear-gradient(to top,rgba(8,8,8,.92),transparent);pointer-events:none;z-index:-1}
+        #carousel-text{color:#d5cec4;font-size:13.5px;line-height:1.65;max-height:72px;overflow-y:auto;scrollbar-width:none;margin-bottom:8px}
+        #carousel-text::-webkit-scrollbar{display:none}
+        #carousel-counter{color:rgba(200,160,110,.35);font-size:11px;letter-spacing:1px}
+        #carousel-dots{display:flex;gap:5px;justify-content:center;margin-bottom:8px;flex-shrink:0;z-index:5}
+        .c-dot{width:5px;height:5px;border-radius:50%;background:rgba(200,160,110,.15);transition:background .3s ease,transform .3s ease}
+        .c-dot.active{background:rgba(200,160,110,.7);transform:scale(1.4)}
+        #carousel-hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);color:rgba(200,160,110,.25);font-size:10.5px;letter-spacing:1.5px;pointer-events:none;animation:hintB 3s ease-in-out infinite;transition:opacity .5s ease;z-index:6}
+        #carousel-hint.gone{opacity:0}
     </style>
 </head>
 <body>
@@ -346,14 +131,32 @@
     <button id="dialog-btn">Продолжить</button>
 </div>
 
-<div id="music-shelf" class="hidden">
-    <div id="shelf-track"></div>
-</div>
+<div id="music-shelf" class="hidden"><div id="shelf-track"></div></div>
 
 <div id="music-player">
     <div id="player-artist-name"></div>
     <button id="player-close">&times;</button>
     <div id="player-content"></div>
+</div>
+
+<div id="books-grid-wrap" class="hidden"><div id="books-grid"></div></div>
+
+<div id="book-modal-overlay">
+    <div id="book-modal">
+        <div class="modal-book-title" id="modal-title"></div>
+        <div class="modal-book-author" id="modal-author"></div>
+        <div class="modal-book-text" id="modal-text"></div>
+    </div>
+</div>
+
+<div id="carousel-wrap" class="hidden">
+    <div id="carousel-stage"></div>
+    <div id="carousel-dots"></div>
+    <div id="carousel-info">
+        <div id="carousel-text"></div>
+        <div id="carousel-counter"></div>
+    </div>
+    <div id="carousel-hint">свайпай влево и вправо</div>
 </div>
 
 <div id="back-btn">&larr;</div>
@@ -365,377 +168,440 @@ const ROOMS = {
     hub: {
         bg: 'https://i.postimg.cc/5tJmjVRc/Gemini-Generated-Image-6c01m86c01m86c01.png',
         dialogues: [
-            {
-                text: 'Привет! Рад, что тебе стало интересно. Это место — дополнение к моему профилю. Мне хотелось рассказать про себя немного более развёрнуто, чем это позволяет приложение.',
-                btn: 'Продолжить'
-            },
-            {
-                text: 'Перед тобой комната. Нажимай на подсвеченные предметы, чтобы узнать, чем я живу, какая у меня история или чем я увлекаюсь.',
-                btn: 'Продолжить'
-            },
-            {
-                text: 'Если тебе захочется познакомиться — ты можешь написать мне в телеграм или оставить свой контакт, и я напишу тебе сам. Ещё можно поставить лайк в приложении, только у меня нет премиума, и это может быть не очень надёжно.',
-                btn: 'Посмотреть комнату'
-            }
+            { text: 'Привет! Рад, что тебе стало интересно. Это место — дополнение к моему профилю. Мне хотелось рассказать про себя немного более развёрнуто, чем это позволяет приложение.', btn: 'Продолжить' },
+            { text: 'Перед тобой комната. Нажимай на подсвеченные предметы, чтобы узнать, чем я живу, какая у меня история или чем я увлекаюсь.', btn: 'Продолжить' },
+            { text: 'Если тебе захочется познакомиться — ты можешь написать мне в телеграм или оставить свой контакт, и я напишу тебе сам. Ещё можно поставить лайк в приложении, только у меня нет премиума, и это может быть не очень надёжно.', btn: 'Посмотреть комнату' }
         ],
         hotspots: [
             { x: 22, y: 32, size: 52, target: 'books'  },
-            { x: 52, y: 22, size: 52, target: 'games'  },
+            { x: 52, y: 22, size: 52, target: 'views'  },
             { x: 78, y: 40, size: 52, target: 'music'  },
             { x: 30, y: 62, size: 52, target: 'dreams' },
-            { x: 68, y: 68, size: 52, target: 'views'  }
+            { x: 68, y: 68, size: 52, target: 'travels'}
         ]
     },
 
     books: {
-        bg: 'linear-gradient(145deg, #12141e 0%, #1a1e30 50%, #10131f 100%)',
+        bg: 'https://i.postimg.cc/8zZB1PY5/Comfy-UI-00095.png',
         dialogues: [
-            {
-                text: 'Здесь напишите про книги, которые читаете. Что последнее прочитали, что повлияло, что перечитываете.',
-                btn: 'Далее'
-            },
-            {
-                text: 'Второй абзац — например, про любимого автора или жанр, к которому возвращаетесь.',
-                btn: 'Понятно'
-            }
+            { text: 'Тут что-то про то, что я когда-то читал, читаю, или хочу прочитать.', btn: 'Продолжить' },
+            { text: 'Ты можешь нажать на любую книгу и узнать немного подробнее.', btn: 'Понятно' }
         ],
-        hotspots: []
-    },
-
-    games: {
-        bg: 'linear-gradient(145deg, #1a1210 0%, #261a15 50%, #1a1210 100%)',
-        dialogues: [
-            {
-                text: 'Здесь — про любимые игры или фильмы. Можно упомянуть конкретные тайтлы и почему они важны для вас.',
-                btn: 'Понятно'
-            }
-        ],
-        hotspots: []
-    },
-
-    music: {
-        bg: 'https://i.postimg.cc/jqWRdwn7/Comfy-UI-00091.png',
-        dialogues: [
-            {
-                text: 'Эта комната своего рода саундтрек ко мне) Здесь ты можешь посмотреть какую я слушаю музыку.',
-                btn: 'Продолжить'
-            },
-            {
-                text: 'Список не исчерпывающий, зато ты можешь послушать отрывки прямо тут.',
-                btn: 'Не надо лишних слов'
-            }
-        ],
-        shelf: [
-            {
-                cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/30/80/f8/3080f89f-283c-7182-8d4e-fdddf5d54fec/cover.jpg/316x316bb.webp',
-                artist: 'Mirele',
-                track: 'Жертвоприношение',
-                embed: '<iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="175" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/ru/song/%D0%B6%D0%B5%D1%80%D1%82%D0%B2%D0%BE%D0%BF%D1%80%D0%B8%D0%BD%D0%BE%D1%88%D0%B5%D0%BD%D0%B8%D0%B5/1742996858"></iframe>'
-            },
-            {
-                cover: 'https://is1-ssl.mzstatic.com/image/thumb/Video125/v4/2f/8d/8a/2f8d8a1a-9bf0-a16f-f7fe-36fd1ea9a304/Job8c9725e3-cb20-4cb4-b5a0-9f857c913c7e-113823508-PreviewImage_preview_image_nonvideo_sdr-Time1621272062755.png/316x316bb.webp',
-                artist: 'TOOL',
-                track: 'Название трека',
-                embed: '<iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="175" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/ru/song/schism/1474185654"></iframe>'
-            },
-            {
-                cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/5b/b8/00/5bb80093-db7e-fdb9-c4ce-48f81847f68b/mzi.jwcepubj.jpg/316x316bb.webp',
-                artist: 'Aphex twin',
-                track: 'Название трека',
-                embed: '<iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="175" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/ru/song/xtal/1668862649"></iframe>'
-            },
-            {
-                cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/05/12/64/05126407-a371-8fa9-9429-0e0b60deebcb/mzi.jqdlqldj.jpg/316x316bb.webp',
-                artist: 'type o negative',
-                track: 'Название трека',
-                embed: '<iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="175" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/ru/song/love-you-to-death/299826868"></iframe>'
-            },
-            {
-                cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/e1/0e/28/e10e28c1-bed6-3143-cb91-265ba590bc35/15UMGIM65435.rgb.jpg/316x316bb.webp',
-                artist: 'Roy Ayers',
-                track: 'Название трека',
-                embed: '<iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="175" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/ru/song/the-third-eye/1469585195"></iframe>'
-            },
-            {
-                cover: 'https://is1-ssl.mzstatic.com/image/thumb/Video116/v4/b5/0a/54/b50a545f-b1d5-5ef0-8db5-3c5f81059fc1/Job1f467e72-4bda-404b-ab58-d69b6c33f78d-126024009-PreviewImage_preview_image_nonvideo_sdr-Time1637264880420.png/316x316bb.webp',
-                artist: 'Childish Gambino',
-                track: 'Название трека',
-                embed: '<iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="175" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/ru/song/redbone/1771719595"></iframe>'
-            }
-        ],
-        hotspots: []
-    },
-
-    dreams: {
-        bg: 'linear-gradient(145deg, #16140e 0%, #201e14 50%, #16140e 100%)',
-        dialogues: [
-            {
-                text: 'О чём мечтаете, какие планы, куда хотите поехать или чем хотите заняться. Искренне и по-настоящему.',
-                btn: 'Понятно'
-            }
+        books: [
+            { title: 'Волшебная гора', author: 'Томас Манн', text: 'Эту книгу я читал в общей сложности около 9 лет) Когда-то давно начал, прочитал примерно половину первого тома и несмотря на то, что она показалась мне увлекательной, никак не получалось двигаться по ней дальше. И вот спустя лет 9, кажется это было во время ковида, нашёл в себе желание продолжить и дочитал.' },
+            { title: 'Гарри Поттер и методы рационального мышления', author: 'Элиезер Юдковский', text: 'Я не фанат Гарри Поттера. Нахожу их вселенную весьма примитивной. Интересно, кто из моих ровесников прямо сейчас решил, что это точно не метч) В детстве мне не было интересно смотреть эти фильмы и я впервые посмотрел все уже лет в 25. Книги никогда не читал. Эта конкретная книга — это вообще фанфик. Мне в своё время понравились статьи этого автора, не связанные с художественными произведениями, и позже я узнал, что он написал и это. В своё время очень понравилось. Вселенная стала гораздо более продуманной, персонажи обрели глубину. Мне нравятся дофига умные герои приключений) Ещё бы мог по соседству добавить «Мать учений», там тоже и магия и интеллект пересекаются.' },
+            { title: 'Красная таблетка', author: 'Андрей Курпатов', text: 'Спорный автор, понимаю. Но когда-то именно с этой книги я начал свой путь к работе над своим мышлением и менталкой. Потом уже появились более признанные авторы — Илсе Санд, Франкл, Бек, Бёрн. А вот Фрейда или Юнга я так и не нашёл желания почитать. Скептично отношусь к психоаналитике.' },
+            { title: 'Тьма, что предшествует', author: 'Скотт Бэккер', text: 'Это читаю прямо сейчас. Очень увлечён. Многие говорят, что это лучшее, что есть в жанре тёмного фэнтези. Ранее я был не знаком с жанром и решил попробовать с лучшего) Сейчас читаю 6-ю из 7 книг.' },
+            { title: 'Sapiens', author: 'Юваль Ной Харари', text: 'Помню, что было увлекательно) Большую часть информации оттуда уже не мог воспринять как новую, но по крайней мере она была здорово там структурирована.' },
+            { title: 'Терапия Лодж', author: 'Норман Маклин', text: 'В целом я люблю какие-то истории про жизни вполне обычных людей. Сюда же могу добавить книгу «Элеанор Олифант в полном порядке». В юношестве любил Пауло Коэльо.' }
         ],
         hotspots: []
     },
 
     views: {
-        bg: 'linear-gradient(145deg, #10101a 0%, #16162a 50%, #10101a 100%)',
+        bg: 'linear-gradient(145deg, #14110e 0%, #1e1914 50%, #14110e 100%)',
         dialogues: [
+            { text: 'Тут немного про мои развлечения. Люблю что-то смотреть, во что-нибудь играть, в чём-нибудь разбираться)', btn: 'Далее' }
+        ],
+        carousel: [
+            { image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlGEbEkT1W5gAA8jB2pooepVjlD25v5C7J9T9z3wn--HWGjYvtie8KgEs&s=10', text: 'Это видео-игра. Очень понравилась, и в частности саундтрек. Рекомендую послушать, ну а может и поиграть.' },
+            { image: 'https://sm.ign.com/ign_de/cover/t/the-alters/the-alters_wtz9.jpg', text: 'И это видео-игра. Здорово погружает в рефлексию.' },
+            { image: 'https://upload.wikimedia.org/wikipedia/ru/9/95/My_Blueberry_Nights_poster.jpg', text: 'Это уже фильм. Обожаю фильмы в жанре дорожного приключения, а это особенно.' },
+            { image: 'https://www.kino-teatr.ru/movie/posters/big/2/2/132922.jpg', text: 'Отличный сериал про отношения между людьми в космическом сеттинге, сдобренный добрым юмором.' },
+            { image: 'https://avatars.mds.yandex.net/get-kinopoisk-image/1600647/10c5f480-c2ca-481f-a343-1faf5225614e/600x900', text: 'Как пишут, \u00ABмагический реализм и афро-сюрреализм\u00BB. Мне просто очень комфортно было его смотреть.' },
+            { image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRiI-mfWINM1Fd36uulXjhEKdlztriyt1F9WaJ38Ma5pg&s=10', text: 'Ну это, наверное, уже современная классика. Я совсем не интересуюсь спортом, но это лучшее, что я видел связанное со спортом.' },
+            { image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQn-TWe6XPRidasSBHvv_WdFxgDlkkI2YLtR4a3BKyuQa8YqD1S8GhAFHru&s=10', text: 'Я смотрю аниме. Но чаще всего мне ничего не нравится. Постоянно всё озвучивают и объясняют как будто я сам не в состоянии понять что там происходит. Это крепкое исключение.' },
+            { image: 'https://upload.wikimedia.org/wikipedia/ru/1/13/Drive2011Poster.jpg', text: 'Ну куда без Гослинга.' },
+            { image: 'https://static.okko.tv/images/v4/6443030f-7254-41c3-9c41-5e6c35100f1a', text: 'Один из любимых режиссёров.' },
+            { image: 'https://avatars.mds.yandex.net/get-kinopoisk-image/1629390/b9f58643-a26e-4269-a4d6-02ccc736afdf/600x900', text: 'Люблю хорошие мультфильмы. Рик и Морти, кстати, в их число не вношу.' },
+            { image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSlTqCTEIhL7Uk6FDk95K6_YvYoqGDB-eVjLtiotC6P3w&s=10', text: '\u00ABФормы постоянно меняются. Изменения — это их естественное состояние. Так же как мы. Даже если внешне мы не меняемся, внутри изменения происходят постоянно. Во мне есть что-то, что я давно уже предпочитал не замечать. Оно пугает меня. Но это часть меня. И пока я знаю, какую форму имеет моя душа — со мной всё будет в порядке.\u00BB' },
+            { image: 'https://planeta-igr.com/image/data/goods/93557.jpg', text: 'Настольная игра. Интересная, к сожалению всего пару раз удалось собрать 6 человек для полноценной партии.' },
+            { image: 'https://hobbygames.ru/image/cache/hobbygames_beta/data/CrowD_Games/Root/Hobby%20Games/Root-1024x1024-wm.jpg', text: 'В целом люблю настольные игры евро-типа.' },
+            { image: 'https://i.postimg.cc/CK29LZZV/Snimok-ekrana-ot-2026-07-15-23-33-36.png', text: 'Интересно пробовать что-нибудь новое для себя, например вайбкодинг.' },
+            { image: 'https://images-cdn.onlinetestpad.net/d3/2c/469068514a8ca2270fd13136e9b2.jpg', text: 'Интересна история как сфера знаний.' }
+        ],
+        hotspots: []
+    },
+
+    // ——— Музыка ———
+    //  Каждый трек теперь имеет ДВА embed:
+    //    embed_ru   — для России (СберЗвук)
+    //    embed_intl — для остальных стран (Apple Music / Яндекс)
+    //
+    //  Формат любой — как и раньше:
+    //    • Полный HTML-код iframe (скопированный из сервиса)
+    //    • Или просто ссылка (будет обёрнута в iframe)
+    //
+    //  Автоопределение: при загрузке страницы пробуем достучаться
+    //  до zvuk.com. Если доступен — используем embed_ru,
+    //  если нет — embed_intl.
+    //
+    music: {
+        bg: 'https://i.postimg.cc/jqWRdwn7/Comfy-UI-00091.png',
+        dialogues: [
+            { text: 'Эта комната своего рода саундтрек ко мне) Здесь ты можешь посмотреть какую я слушаю музыку.', btn: 'Продолжить' },
+            { text: 'Список не исчерпывающий, зато ты можешь послушать отрывки прямо тут.', btn: 'Не надо лишних слов' }
+        ],
+        shelf: [
             {
-                text: 'Ваши взгляды — на отношения, на работу, на то, что важно, а что нет. То, что помогает понять, совпадёте ли вы с человеком.',
-                btn: 'Понятно'
+                cover: 'https://picsum.photos/seed/track01/260/260',
+                artist: 'Исполнитель 1',
+                track: 'Жертвоприношение',
+                embed_ru: 'https://zvuk.com/embed/track?id=126574998',
+                embed_intl: '<iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="175" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/ru/song/%D0%B6%D0%B5%D1%80%D1%82%D0%B2%D0%BE%D0%BF%D1%80%D0%B8%D0%BD%D0%BE%D1%88%D0%B5%D0%BD%D0%B8%D0%B5/1742996858"></iframe>'
+            },
+            {
+                cover: 'https://picsum.photos/seed/track02/260/260',
+                artist: 'Исполнитель 2',
+                track: 'Название трека',
+                // Ссылка на трек в СберЗвук (найдите на zvuk.com → Поделиться → Код для встраивания)
+                embed_ru: 'https://zvuk.com/embed/track?id=TRACK_ID',
+                // Apple Music или Яндекс Музыка — ссылка или полный iframe
+                embed_intl: 'https://music.yandex.ru/iframe/#track/TRACK_ID/ALBUM_ID'
+            },
+            {
+                cover: 'https://picsum.photos/seed/track03/260/260',
+                artist: 'Исполнитель 3',
+                track: 'Название трека',
+                embed_ru: 'https://zvuk.com/embed/track?id=TRACK_ID',
+                embed_intl: 'https://music.yandex.ru/iframe/#track/TRACK_ID/ALBUM_ID'
+            },
+            {
+                cover: 'https://picsum.photos/seed/track04/260/260',
+                artist: 'Исполнитель 4',
+                track: 'Название трека',
+                embed_ru: 'https://zvuk.com/embed/track?id=TRACK_ID',
+                embed_intl: 'https://music.yandex.ru/iframe/#track/TRACK_ID/ALBUM_ID'
+            },
+            {
+                cover: 'https://picsum.photos/seed/track05/260/260',
+                artist: 'Исполнитель 5',
+                track: 'Название трека',
+                embed_ru: 'https://zvuk.com/embed/track?id=TRACK_ID',
+                embed_intl: 'https://music.yandex.ru/iframe/#track/TRACK_ID/ALBUM_ID'
+            },
+            {
+                cover: 'https://picsum.photos/seed/track06/260/260',
+                artist: 'Исполнитель 6',
+                track: 'Название трека',
+                embed_ru: 'https://zvuk.com/embed/track?id=TRACK_ID',
+                embed_intl: 'https://music.yandex.ru/iframe/#track/TRACK_ID/ALBUM_ID'
             }
+        ],
+        hotspots: []
+    },
+
+    travels: {
+        bg: 'https://i.postimg.cc/h4M5JgNt/Comfy-UI-00102.png',
+        dialogues: [
+            { text: 'Тут немного про то, где я успел побывать.', btn: 'Далее' },
+            { text: 'Самое первое моё путешествие было на юг. Через программу WWOOF я пожил на фермах в Ростовской и Краснодарской областях, а также в Абхазии. Позднее, уже в 2024 и 2025 годах добавились ещё регионы Северного Кавказа и Армения.', btn: 'Далее' },
+            { text: 'Потом летал в Индию. Был в Дели, Лакнау и Амрицаре. Жил с местными через сервис Couchsurfing. Очень классная идея приложения, если не знакомы — рекомендую хотя бы загуглить.', btn: 'Далее' },
+            { text: 'Далее полетел в Израиль. Тоже Couchsurfing. Дальше по плану должен был быть Марокко, но из-за ковида я так туда и не попал. Идея именно этих стран была для меня в их мультикультурности как основного предмета интереса.', btn: 'Далее' },
+            { text: 'Продолжая тему со сторонами света, поездил немного по России. На восток: Владимир, Нижний Новгород, Чебоксары, Казань. А позднее — Иркутск и Байкал.', btn: 'Далее' },
+            { text: 'На север: Тверь, Питер, Петрозаводск, Калининград, Апатиты — поход в горы Хибины.', btn: 'Далее' },
+            { text: 'А вот из западного направления пока побывал только в Минске.', btn: 'Далее' },
+            { text: 'Много где ещё хотел бы побывать. Хотелось бы вернуться в кавказские горы. Хотелось бы увидеть океан. Пустыню. Среднюю Азию. Ирак, Иран, Афганистан. Африка. Да и много куда ещё, но как-то дорого всё это стало, приходится себя ограничивать)', btn: 'Далее' }
+        ],
+        hotspots: []
+    },
+
+    dreams: {
+        bg: 'https://i.postimg.cc/zvwJvvCQ/Gemini-Generated-Image-4iqjxv4iqjxv4iqj.png',
+        dialogues: [
+            { text: 'Тут справедливо было бы ожидать какой-то рассказ о том, каким я себя вижу, какие у меня ценности, взгляды на жизнь и отношения. Но у меня другая идея)', btn: 'Далее' },
+            { text: 'Эта комната — видоизменённая копия моей реальной комнаты. Большая часть предметов интерьера, мебели и личных вещей существует в реальности. Некоторые детали — условности, они могут не существовать в принципе, или находиться за пределами комнаты, но они дополняют картину.', btn: 'Далее' },
+            { text: 'Я не рассказываю здесь о том, каким я вижу себя сам. Вместо этого я даю тебе возможность сформировать собственное впечатление обо мне. Если вайб — пиши)', btn: '\u2190 Назад', return: true }
         ],
         hotspots: []
     }
 };
 
 
-const app          = document.getElementById('app');
-const roomBg       = document.getElementById('room-bg');
-const dialogBox    = document.getElementById('dialog-box');
-const dialogText   = document.getElementById('dialog-text');
-const dialogBtn    = document.getElementById('dialog-btn');
-const hotspotsEl   = document.getElementById('hotspots-container');
-const backBtn      = document.getElementById('back-btn');
-const hintEl       = document.getElementById('hint');
-const musicShelf   = document.getElementById('music-shelf');
-const shelfTrack   = document.getElementById('shelf-track');
-const musicPlayer  = document.getElementById('music-player');
-const playerArtist = document.getElementById('player-artist-name');
-const playerClose  = document.getElementById('player-close');
-const playerContent= document.getElementById('player-content');
+// ═══════════════════════════════════════════════════════════════
+//  ОПРЕДЕЛЕНИЕ РЕГИОНА
+//  Пробуем загрузить favicon с zvuk.com.
+//  Если загрузилось — мы в России (или VPN на РФ) → СберЗвук.
+//  Если ошибка или таймаут 3с — международный → Apple Music.
+// ═══════════════════════════════════════════════════════════════
 
-let currentRoom      = null;
-let dialogueIndex    = 0;
-let typeTimer        = null;
-let typeDone         = false;
-let fullText         = '';
-let isReturnMode     = false;
-let isTransitioning  = false;
-let history          = [];
-let completedRooms   = new Set();
+let detectedRegion = null;
+let regionPromise  = null;
 
-const TYPE_SPEED = 28;
+function detectRegion() {
+    if (regionPromise) return regionPromise;
+
+    regionPromise = new Promise(resolve => {
+        const img = new Image();
+        const timer = setTimeout(() => {
+            img.src = '';
+            resolve('intl');
+        }, 3000);
+
+        img.onload = () => { clearTimeout(timer); resolve('ru'); };
+        img.onerror = () => { clearTimeout(timer); resolve('intl'); };
+        img.src = 'https://zvuk.com/favicon.ico?_d=' + Date.now();
+    });
+
+    return regionPromise;
+}
+
+// Запускаем определение сразу при загрузке
+detectRegion().then(r => { detectedRegion = r; });
+
+
+// ═══════════════════════════════════════════════
+//  ЛОГИКА
+// ═══════════════════════════════════════════════
+
+const app            = document.getElementById('app');
+const roomBg         = document.getElementById('room-bg');
+const dialogBox      = document.getElementById('dialog-box');
+const dialogText     = document.getElementById('dialog-text');
+const dialogBtn      = document.getElementById('dialog-btn');
+const hotspotsEl     = document.getElementById('hotspots-container');
+const backBtn        = document.getElementById('back-btn');
+const hintEl         = document.getElementById('hint');
+const musicShelf     = document.getElementById('music-shelf');
+const shelfTrack     = document.getElementById('shelf-track');
+const musicPlayer    = document.getElementById('music-player');
+const playerArtist   = document.getElementById('player-artist-name');
+const playerClose    = document.getElementById('player-close');
+const playerContent  = document.getElementById('player-content');
+const booksGridWrap  = document.getElementById('books-grid-wrap');
+const booksGrid      = document.getElementById('books-grid');
+const bookOverlay    = document.getElementById('book-modal-overlay');
+const modalTitle     = document.getElementById('modal-title');
+const modalAuthor    = document.getElementById('modal-author');
+const modalText      = document.getElementById('modal-text');
+const carouselWrap   = document.getElementById('carousel-wrap');
+const carouselStage  = document.getElementById('carousel-stage');
+const carouselDots   = document.getElementById('carousel-dots');
+const carouselTextEl = document.getElementById('carousel-text');
+const carouselCount  = document.getElementById('carousel-counter');
+const carouselHint   = document.getElementById('carousel-hint');
+
+let currentRoom     = null;
+let dialogueIndex   = 0;
+let typeTimer       = null;
+let typeDone        = false;
+let fullText        = '';
+let isReturnMode    = false;
+let isTransitioning = false;
+let history         = [];
+let completedRooms  = new Set();
+const TYPE_SPEED    = 28;
+
+let cItems = [], cTotal = 0, cCurrent = 0, cTouchX = 0, cHintOn = true;
 
 
 function loadRoom(roomId, addToHistory) {
     if (isTransitioning) return;
     const room = ROOMS[roomId];
     if (!room) return;
-
-    if (addToHistory && currentRoom) {
-        history.push(currentRoom);
-    }
-
+    if (addToHistory && currentRoom) history.push(currentRoom);
     isTransitioning = true;
     app.classList.add('fading');
 
     setTimeout(() => {
-        currentRoom   = roomId;
-        dialogueIndex = 0;
-        isReturnMode  = false;
+        currentRoom = roomId; dialogueIndex = 0; isReturnMode = false;
 
         if (room.bg.startsWith('linear') || room.bg.startsWith('radial') || room.bg.startsWith('#')) {
-            roomBg.style.backgroundImage = 'none';
-            roomBg.style.background = room.bg;
+            roomBg.style.backgroundImage = 'none'; roomBg.style.background = room.bg;
         } else {
-            roomBg.style.background = '';
-            roomBg.style.backgroundImage = 'url(\'' + room.bg + '\')';
+            roomBg.style.background = ''; roomBg.style.backgroundImage = 'url(\'' + room.bg + '\')';
         }
-        roomBg.style.backgroundSize = 'cover';
-        roomBg.style.backgroundPosition = 'center';
+        roomBg.style.backgroundSize = 'cover'; roomBg.style.backgroundPosition = 'center';
 
         hotspotsEl.innerHTML = '';
         hintEl.classList.remove('visible');
         musicShelf.classList.add('hidden');
-        closePlayer();
-
+        booksGridWrap.classList.add('hidden');
+        carouselWrap.classList.add('hidden');
+        closePlayer(); closeBookModal();
         backBtn.classList.toggle('visible', roomId !== 'hub');
 
         if (completedRooms.has(roomId)) {
-            dialogBox.classList.add('hidden');
-            if (room.shelf && room.shelf.length > 0) {
-                showShelf(room);
-            } else {
-                showHotspots(room);
-            }
+            dialogBox.classList.add('hidden'); showRoomContent(room);
         } else if (room.dialogues && room.dialogues.length > 0) {
             showDialogue();
         } else {
-            dialogBox.classList.add('hidden');
-            if (room.shelf && room.shelf.length > 0) {
-                showShelf(room);
-            } else {
-                showHotspots(room);
-            }
-            completedRooms.add(roomId);
+            dialogBox.classList.add('hidden'); showRoomContent(room); completedRooms.add(roomId);
         }
-
-        app.classList.remove('fading');
-        isTransitioning = false;
+        app.classList.remove('fading'); isTransitioning = false;
     }, 460);
 }
 
+function showRoomContent(room) {
+    if (room.hotspots && room.hotspots.length > 0) showHotspots(room);
+    else if (room.shelf && room.shelf.length > 0) showShelf(room);
+    else if (room.books && room.books.length > 0) showBooksGrid(room);
+    else if (room.carousel && room.carousel.length > 0) showCarousel(room);
+}
+
+function roomHasContent(room) {
+    return (room.hotspots && room.hotspots.length > 0) || (room.shelf && room.shelf.length > 0) || (room.books && room.books.length > 0) || (room.carousel && room.carousel.length > 0);
+}
 
 function showDialogue() {
-    const room = ROOMS[currentRoom];
-    const d = room.dialogues[dialogueIndex];
-
+    const room = ROOMS[currentRoom], d = room.dialogues[dialogueIndex];
     if (!d) {
-        completedRooms.add(currentRoom);
-
-        if (room.hotspots && room.hotspots.length > 0) {
-            dialogBox.classList.add('hidden');
-            showHotspots(room);
-        } else if (room.shelf && room.shelf.length > 0) {
-            dialogBox.classList.add('hidden');
-            showShelf(room);
-        } else {
-            dialogText.textContent = '';
-            dialogBtn.textContent = '\u2190 Назад';
-            isReturnMode = true;
-        }
+        if (roomHasContent(room)) { completedRooms.add(currentRoom); dialogBox.classList.add('hidden'); showRoomContent(room); }
+        else { dialogText.textContent = ''; dialogBtn.textContent = '\u2190 Назад'; isReturnMode = true; }
         return;
     }
-
-    isReturnMode = false;
-    dialogBox.classList.remove('hidden');
-    fullText = d.text;
-    typeDone = false;
-    dialogBtn.textContent = d.btn;
-    startTypewriter(fullText);
+    isReturnMode = false; dialogBox.classList.remove('hidden');
+    fullText = d.text; typeDone = false; dialogBtn.textContent = d.btn; startTypewriter(fullText);
 }
-
 
 function startTypewriter(text) {
-    clearInterval(typeTimer);
-    dialogText.textContent = '';
-    let i = 0;
-    typeTimer = setInterval(() => {
-        if (i < text.length) {
-            dialogText.textContent += text[i];
-            i++;
-        } else {
-            clearInterval(typeTimer);
-            typeDone = true;
-        }
-    }, TYPE_SPEED);
+    clearInterval(typeTimer); dialogText.textContent = ''; let i = 0;
+    typeTimer = setInterval(() => { if (i < text.length) { dialogText.textContent += text[i]; i++; } else { clearInterval(typeTimer); typeDone = true; } }, TYPE_SPEED);
 }
-
-function skipTypewriter() {
-    clearInterval(typeTimer);
-    dialogText.textContent = fullText;
-    typeDone = true;
-}
-
+function skipTypewriter() { clearInterval(typeTimer); dialogText.textContent = fullText; typeDone = true; }
 
 function showHotspots(room) {
-    if (!room.hotspots || room.hotspots.length === 0) return;
-
     room.hotspots.forEach(h => {
-        const el = document.createElement('div');
-        el.className = 'hotspot';
-        el.style.left   = h.x + '%';
-        el.style.top    = h.y + '%';
-        el.style.width  = h.size + 'px';
-        el.style.height = h.size + 'px';
-
-        el.innerHTML =
-            '<div class="hotspot-glow"></div>' +
-            '<div class="hotspot-ring"></div>' +
-            '<div class="hotspot-ring"></div>' +
-            '<div class="hotspot-dot"></div>';
-
-        el.addEventListener('click', () => loadRoom(h.target, true));
-        hotspotsEl.appendChild(el);
+        const el = document.createElement('div'); el.className = 'hotspot';
+        el.style.left = h.x+'%'; el.style.top = h.y+'%'; el.style.width = h.size+'px'; el.style.height = h.size+'px';
+        el.innerHTML = '<div class="hotspot-glow"></div><div class="hotspot-ring"></div><div class="hotspot-ring"></div><div class="hotspot-dot"></div>';
+        el.addEventListener('click', () => loadRoom(h.target, true)); hotspotsEl.appendChild(el);
     });
-
-    if (currentRoom === 'hub') {
-        hintEl.classList.add('visible');
-    }
+    if (currentRoom === 'hub') hintEl.classList.add('visible');
 }
-
 
 function showShelf(room) {
     shelfTrack.innerHTML = '';
-
     room.shelf.forEach((item, i) => {
-        const card = document.createElement('div');
-        card.className = 'shelf-card';
-
-        let trackNameHTML = '';
-        if (item.track) {
-            trackNameHTML = '<div class="shelf-track-name">' + item.track + '</div>';
-        }
-
-        card.innerHTML =
-            '<div class="shelf-cover" style="background-image:url(\'' + item.cover + '\')"></div>' +
-            '<div class="shelf-artist">' + item.artist + '</div>' +
-            trackNameHTML;
-
-        card.addEventListener('click', () => openPlayer(item, i));
-        shelfTrack.appendChild(card);
+        const card = document.createElement('div'); card.className = 'shelf-card';
+        card.innerHTML = '<div class="shelf-cover" style="background-image:url(\''+item.cover+'\')"></div><div class="shelf-artist">'+item.artist+'</div>'+(item.track ? '<div class="shelf-track-name">'+item.track+'</div>' : '');
+        card.addEventListener('click', () => openPlayer(item, i)); shelfTrack.appendChild(card);
     });
-
     musicShelf.classList.remove('hidden');
 }
 
 
-function openPlayer(item, index) {
-    document.querySelectorAll('.shelf-card').forEach((c, i) => {
-        c.classList.toggle('active', i === index);
-    });
+// ——— Плеер с выбором источника по региону ———
+async function openPlayer(item, index) {
+    document.querySelectorAll('.shelf-card').forEach((c, i) => c.classList.toggle('active', i === index));
+    let label = item.artist; if (item.track) label += ' \u2014 ' + item.track; playerArtist.textContent = label;
 
-    let label = item.artist;
-    if (item.track) label += ' \u2014 ' + item.track;
-    playerArtist.textContent = label;
+    // Если регион ещё не определён — ждём результат (максимум 3с)
+    if (!detectedRegion) {
+        detectedRegion = await detectRegion();
+    }
+
+    // Выбираем нужный embed: Россия → СберЗвук, остальные → Apple Music / Яндекс
+    let embedCode;
+    if (detectedRegion === 'ru' && item.embed_ru) {
+        embedCode = item.embed_ru;
+    } else if (item.embed_intl) {
+        embedCode = item.embed_intl;
+    } else {
+        // Фолбэк: если указан только один embed (совместимость со старым форматом)
+        embedCode = item.embed;
+    }
 
     if (item.mp3) {
-        playerContent.innerHTML =
-            '<audio controls src="' + item.mp3 + '" preload="none"></audio>';
-    } else if (item.embed && item.embed.trim().charAt(0) === '<') {
-        playerContent.innerHTML = item.embed;
-    } else if (item.embed) {
-        playerContent.innerHTML =
-            '<iframe src="' + item.embed + '" allow="autoplay" loading="lazy"></iframe>';
-    }
+        playerContent.innerHTML = '<audio controls src="'+item.mp3+'" preload="none"></audio>';
+        musicPlayer.classList.add('visible');
+    } else if (embedCode) {
+        playerContent.innerHTML = '<div class="player-spinner">Загрузка</div>';
+        musicPlayer.classList.add('visible');
 
-    musicPlayer.classList.add('visible');
+        let iframeEl;
+        if (embedCode.trim().charAt(0) === '<') {
+            const w = document.createElement('div'); w.innerHTML = embedCode; iframeEl = w.querySelector('iframe');
+            if (!iframeEl) { playerContent.innerHTML = embedCode; return; }
+        } else {
+            iframeEl = document.createElement('iframe'); iframeEl.src = embedCode; iframeEl.allow = 'autoplay'; iframeEl.setAttribute('loading','lazy');
+        }
+        iframeEl.style.cssText = 'width:100%!important;max-width:100%!important;height:180px!important;border:none!important;border-radius:8px!important;overflow:hidden!important;display:block!important;opacity:0;position:absolute;top:0;left:0;transition:opacity .35s ease;';
+        playerContent.appendChild(iframeEl);
+
+        let revealed = false;
+        const reveal = () => {
+            if (revealed) return; revealed = true;
+            iframeEl.style.opacity = '1'; iframeEl.style.position = 'relative';
+            const sp = playerContent.querySelector('.player-spinner'); if (sp) sp.remove();
+        };
+        iframeEl.addEventListener('load', reveal);
+        setTimeout(reveal, 6000);
+    }
 }
 
-function closePlayer() {
-    musicPlayer.classList.remove('visible');
-    playerContent.innerHTML = '';
-    document.querySelectorAll('.shelf-card').forEach(c => c.classList.remove('active'));
+function closePlayer() { musicPlayer.classList.remove('visible'); playerContent.innerHTML = ''; document.querySelectorAll('.shelf-card').forEach(c => c.classList.remove('active')); }
+
+function showBooksGrid(room) {
+    booksGrid.innerHTML = '';
+    room.books.forEach(book => {
+        const card = document.createElement('div'); card.className = 'book-card';
+        card.innerHTML = '<div class="book-card-title">'+book.title+'</div><div class="book-card-author">'+book.author+'</div>';
+        card.addEventListener('click', () => openBookModal(book)); booksGrid.appendChild(card);
+    });
+    booksGridWrap.classList.remove('hidden');
+}
+function openBookModal(book) { modalTitle.textContent=book.title; modalAuthor.textContent=book.author; modalText.textContent=book.text; bookOverlay.classList.add('visible'); }
+function closeBookModal() { bookOverlay.classList.remove('visible'); }
+bookOverlay.addEventListener('click', e => { if (e.target === bookOverlay) closeBookModal(); });
+
+function showCarousel(room) {
+    cItems = room.carousel; cTotal = cItems.length; cCurrent = 0; cHintOn = true; carouselHint.classList.remove('gone');
+    carouselStage.innerHTML = '';
+    cItems.forEach(item => {
+        const card = document.createElement('div'); card.className = 'c-card';
+        card.innerHTML = '<img src="'+item.image+'" alt="" loading="eager">'; carouselStage.appendChild(card);
+    });
+    carouselDots.innerHTML = '';
+    if (cTotal <= 20) cItems.forEach(() => { const d = document.createElement('div'); d.className = 'c-dot'; carouselDots.appendChild(d); });
+    posCards(); carouselWrap.classList.remove('hidden');
 }
 
-
-dialogText.addEventListener('click', (e) => {
-    if (!typeDone) {
-        e.stopPropagation();
-        skipTypewriter();
+function posCards() {
+    const cards = carouselStage.children, dots = carouselDots.children;
+    for (let i = 0; i < cards.length; i++) {
+        const diff = i - cCurrent; cards[i].className = 'c-card';
+        if (diff < -1) cards[i].classList.add('c-far-l');
+        else if (diff === -1) cards[i].classList.add('c-left');
+        else if (diff === 0) cards[i].classList.add('c-center');
+        else if (diff === 1) cards[i].classList.add('c-right');
+        else cards[i].classList.add('c-far-r');
     }
+    for (let i = 0; i < dots.length; i++) dots[i].classList.toggle('active', i === cCurrent);
+    if (cItems[cCurrent]) { carouselTextEl.textContent = cItems[cCurrent].text; carouselCount.textContent = (cCurrent+1)+' / '+cTotal; }
+}
+
+carouselStage.addEventListener('touchstart', e => { cTouchX = e.touches[0].clientX; }, { passive: true });
+carouselStage.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - cTouchX;
+    if (dx < -35 && cCurrent < cTotal-1) cCurrent++;
+    else if (dx > 35 && cCurrent > 0) cCurrent--;
+    posCards();
+    if (cHintOn) { cHintOn = false; carouselHint.classList.add('gone'); }
 });
 
-dialogBtn.addEventListener('click', (e) => {
+let mDown = false, mX = 0;
+carouselStage.addEventListener('mousedown', e => { mDown = true; mX = e.clientX; });
+window.addEventListener('mouseup', e => {
+    if (!mDown) return; mDown = false;
+    const dx = e.clientX - mX;
+    if (dx < -35 && cCurrent < cTotal-1) cCurrent++;
+    else if (dx > 35 && cCurrent > 0) cCurrent--;
+    posCards();
+    if (cHintOn) { cHintOn = false; carouselHint.classList.add('gone'); }
+});
+
+dialogText.addEventListener('click', e => { if (!typeDone) { e.stopPropagation(); skipTypewriter(); } });
+dialogBtn.addEventListener('click', e => {
     e.stopPropagation();
     if (!typeDone) { skipTypewriter(); return; }
-
-    if (isReturnMode) {
-        if (history.length > 0) loadRoom(history.pop(), false);
-        return;
-    }
-
-    dialogueIndex++;
-    showDialogue();
+    const d = ROOMS[currentRoom].dialogues[dialogueIndex];
+    if (d && d.return) { if (history.length) loadRoom(history.pop(), false); return; }
+    if (isReturnMode) { if (history.length) loadRoom(history.pop(), false); return; }
+    dialogueIndex++; showDialogue();
 });
-
-backBtn.addEventListener('click', () => {
-    if (history.length > 0) loadRoom(history.pop(), false);
-});
-
+backBtn.addEventListener('click', () => { if (history.length) loadRoom(history.pop(), false); });
 playerClose.addEventListener('click', closePlayer);
-
 
 loadRoom('hub', false);
 </script>
