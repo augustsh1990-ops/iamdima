@@ -50,6 +50,43 @@
         #hint.visible{display:block}
         @keyframes hintB{0%,100%{opacity:.25}50%{opacity:.55}}
 
+        /* ===== Кнопка Telegram в хабе ===== */
+        #tg-btn{
+            position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:14px;
+            width:38px;height:38px;border-radius:50%;
+            background:rgba(8,8,8,.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+            border:1px solid rgba(255,255,255,.08);
+            display:none;align-items:center;justify-content:center;cursor:pointer;z-index:20;
+            transition:background .2s ease,transform .15s ease;text-decoration:none;
+        }
+        #tg-btn:active{background:rgba(8,8,8,.8);transform:scale(.9)}
+        #tg-btn.visible{display:flex}
+        #tg-btn img{width:20px;height:20px;pointer-events:none}
+
+        /* ===== Кнопка с печенькой ===== */
+        #cookie-btn{
+            position:fixed;bottom:calc(14px + env(safe-area-inset-bottom,0px));right:14px;
+            width:38px;height:38px;border-radius:50%;
+            background:rgba(8,8,8,.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+            border:1px solid rgba(255,255,255,.08);
+            display:none;align-items:center;justify-content:center;cursor:pointer;z-index:20;
+            transition:background .2s ease,transform .15s ease;font-size:20px;line-height:1;
+        }
+        #cookie-btn:active{background:rgba(8,8,8,.8);transform:scale(.9)}
+        #cookie-btn.visible{display:flex}
+
+        /* ===== Тост-уведомление ===== */
+        #toast{
+            position:fixed;bottom:calc(60px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%) translateY(20px);
+            background:rgba(18,18,18,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+            border:1px solid rgba(200,160,110,.2);border-radius:12px;
+            padding:14px 22px;color:#e4dcd2;font-size:13.5px;line-height:1.6;
+            max-width:calc(100vw - 40px);text-align:center;
+            opacity:0;pointer-events:none;z-index:50;
+            transition:opacity .35s ease,transform .35s ease;
+        }
+        #toast.visible{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+
         /* ===== Музыкальная полка ===== */
         #music-shelf{position:fixed;bottom:0;left:0;right:0;padding:18px 0 calc(26px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,rgba(8,8,8,.94),rgba(8,8,8,.82) 65%,transparent);z-index:10;transition:transform .5s cubic-bezier(.4,0,.2,1),opacity .5s ease}
         #music-shelf.hidden{transform:translateY(100%);opacity:0;pointer-events:none}
@@ -72,7 +109,6 @@
             z-index:16;
             transform:translateY(100%);
             transition:transform .4s cubic-bezier(.4,0,.2,1);
-            /* Прокрутка на случай очень маленького экрана */
             max-height:calc(100dvh - 40px);
             overflow-y:auto;
             scrollbar-width:none;
@@ -83,7 +119,6 @@
         #player-close{position:sticky;top:0;float:right;background:none;border:none;color:#666;font-size:24px;cursor:pointer;padding:2px 6px;line-height:1;transition:color .2s ease;z-index:2}
         #player-close:active{color:#c8a06e}
         #player-content{position:relative;min-height:60px}
-        /* Базовый стиль iframe — конкретная высота задаётся динамически в JS */
         #player-content iframe{
             width:100%!important;max-width:100%!important;
             border:none!important;border-radius:8px!important;
@@ -178,6 +213,14 @@
     <div id="carousel-hint">свайпай влево и вправо</div>
 </div>
 
+<a id="tg-btn" href="https://t.me/Sdjhsd" target="_blank" rel="noopener noreferrer">
+    <img src="image/6422206.png" alt="Telegram">
+</a>
+
+<div id="cookie-btn">🍪</div>
+
+<div id="toast"></div>
+
 <div id="back-btn">&larr;</div>
 <div id="hint">нажимай на светящиеся точки</div>
 
@@ -187,9 +230,9 @@ const ROOMS = {
     hub: {
         bg: 'image/hub.webp',
         dialogues: [
-            { text: 'Привет! Рад, что тебе стало интересно. Это место — дополнение к моему профилю. Мне хотелось рассказать про себя немного более развёрнуто, чем это позволяет приложение.', btn: 'Продолжить' },
+            { text: 'Привет! Рад, что тебе стало интересно. Это место — дополнение к моему профилю. Мне хотелось рассказать про себя немного более развёрнуто, и в другом формате.', btn: 'Продолжить' },
             { text: 'Перед тобой комната. Нажимай на подсвеченные предметы, чтобы узнать, чем я живу, какая у меня история или чем я увлекаюсь.', btn: 'Продолжить' },
-            { text: 'Если тебе захочется познакомиться — ты можешь написать мне в телеграм или оставить свой контакт, и я напишу тебе сам. Ещё можно поставить лайк в приложении, только у меня нет премиума, и это может быть не очень надёжно.', btn: 'Посмотреть комнату' }
+            { text: 'Если тебе захочется познакомиться —  напиши мне в телеграм или поставь лайк в приложении. Только у меня нет премиума, так что это вариант менее надёжен.', btn: 'Посмотреть комнату' }
         ],
         hotspots: [
             { x: 40, y: 38, size: 52, target: 'books'  },
@@ -356,6 +399,9 @@ const dialogBtn      = document.getElementById('dialog-btn');
 const hotspotsEl     = document.getElementById('hotspots-container');
 const backBtn        = document.getElementById('back-btn');
 const hintEl         = document.getElementById('hint');
+const tgBtn          = document.getElementById('tg-btn');
+const cookieBtn      = document.getElementById('cookie-btn');
+const toastEl        = document.getElementById('toast');
 const musicShelf     = document.getElementById('music-shelf');
 const shelfTrack     = document.getElementById('shelf-track');
 const musicPlayer    = document.getElementById('music-player');
@@ -388,6 +434,19 @@ const TYPE_SPEED    = 28;
 
 let cItems = [], cTotal = 0, cCurrent = 0, cTouchX = 0, cHintOn = true;
 
+let toastTimer = null;
+function showToast(msg, duration) {
+    duration = duration || 3500;
+    clearTimeout(toastTimer);
+    toastEl.textContent = msg;
+    toastEl.classList.add('visible');
+    toastTimer = setTimeout(() => { toastEl.classList.remove('visible'); }, duration);
+}
+
+cookieBtn.addEventListener('click', () => {
+    showToast('Этот сайт не собирает никаких персональных данных.');
+});
+
 
 function loadRoom(roomId, addToHistory) {
     if (isTransitioning) return;
@@ -413,7 +472,12 @@ function loadRoom(roomId, addToHistory) {
         booksGridWrap.classList.add('hidden');
         carouselWrap.classList.add('hidden');
         closePlayer(); closeBookModal();
-        backBtn.classList.toggle('visible', roomId !== 'hub');
+
+        // Кнопки хаба: видны только в хабе
+        const isHub = (roomId === 'hub');
+        tgBtn.classList.toggle('visible', isHub);
+        cookieBtn.classList.toggle('visible', isHub);
+        backBtn.classList.toggle('visible', !isHub);
 
         if (completedRooms.has(roomId)) {
             dialogBox.classList.add('hidden'); showRoomContent(room);
@@ -506,13 +570,12 @@ async function openPlayer(item, index) {
             iframeEl = document.createElement('iframe'); iframeEl.src = embedCode; iframeEl.allow = 'autoplay'; iframeEl.setAttribute('loading','lazy');
         }
 
-        // Определяем нужную высоту по домену источника
-        let height = '152px'; // дефолт для Apple Music
+        let height = '152px';
         const src = (iframeEl.getAttribute('src') || '').toLowerCase();
         if (src.includes('zvuk.com')) {
-            height = '240px';   // СберЗвук самый высокий
+            height = '240px';
         } else if (src.includes('yandex')) {
-            height = '80px';    // Яндекс Музыка компактный
+            height = '80px';
         }
 
         iframeEl.style.cssText =
