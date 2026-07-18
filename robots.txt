@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://augustsh1990-ops.github.io/iamdima/sitemap.xml
