@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="https://augustsh1990-ops.github.io/iamdima/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
   <url>
     <loc>https://augustsh1990-ops.github.io/iamdima/</loc>
     <lastmod>2026-07-19</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>1.0</priority>
   </url>
+  
 </urlset>
