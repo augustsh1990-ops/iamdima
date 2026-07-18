@@ -9,13 +9,13 @@
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     <meta name="author" content="deeffeop111">
     <meta name="theme-color" content="#0a0a0a">
-    <link rel="canonical" href="https://deeffeop111.ru/">
+    <link rel="canonical" href="https://augustsh1990-ops.github.io/iamdima/">
 
     <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="deeffeop111 — Моя комната">
     <meta property="og:description" content="Личная комната deeffeop111: увлечения, музыка, книги, путешествия. Дополнение к профилю для знакомства.">
-    <meta property="og:url" content="https://deeffeop111.ru/">
+    <meta property="og:url" content="https://augustsh1990-ops.github.io/iamdima/">
     <meta property="og:site_name" content="deeffeop111">
     <meta property="og:locale" content="ru_RU">
     <meta property="og:image" content="image/hub.webp">
@@ -34,7 +34,7 @@
         "@context": "https://schema.org",
         "@type": "WebSite",
         "name": "deeffeop111",
-        "url": "https://deeffeop111.ru/",
+        "url": "https://augustsh1990-ops.github.io/iamdima/",
         "description": "Личная комната deeffeop111 с рассказом о себе, увлечениях, музыке, книгах и путешествиях.",
         "author": {
             "@type": "Person",
@@ -52,7 +52,7 @@
         "@type": "ProfilePage",
         "name": "deeffeop111 — Моя комната",
         "description": "Дополнение к профилю deeffeop111. Рассказ о себе в развёрнутом формате: книги, музыка, путешествия, взгляды.",
-        "url": "https://deeffeop111.ru/",
+        "url": "https://augustsh1990-ops.github.io/iamdima/",
         "mainEntity": {
             "@type": "Person",
             "name": "deeffeop111",
@@ -110,42 +110,61 @@
         #hint.visible{display:block}
         @keyframes hintB{0%,100%{opacity:.25}50%{opacity:.55}}
 
-        /* ===== Кнопка Telegram в хабе ===== */
-        #tg-btn{
-            position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:14px;
+        /* ===== Левая верхняя группа кнопок ===== */
+        .hub-top-btn{
+            position:fixed;top:calc(14px + env(safe-area-inset-top,0px));
             width:38px;height:38px;border-radius:50%;
             background:rgba(8,8,8,.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
             border:1px solid rgba(255,255,255,.08);
             display:none;align-items:center;justify-content:center;cursor:pointer;z-index:20;
             transition:background .2s ease,transform .15s ease;text-decoration:none;
         }
-        #tg-btn:active{background:rgba(8,8,8,.8);transform:scale(.9)}
-        #tg-btn.visible{display:flex}
+        .hub-top-btn:active{background:rgba(8,8,8,.8);transform:scale(.9)}
+        .hub-top-btn.visible{display:flex}
+
+        #tg-btn{left:14px}
         #tg-btn img{width:20px;height:20px;pointer-events:none}
 
-        /* ===== Кнопка с печенькой ===== */
-        #cookie-btn{
-            position:fixed;bottom:calc(14px + env(safe-area-inset-bottom,0px));right:14px;
-            width:38px;height:38px;border-radius:50%;
-            background:rgba(8,8,8,.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-            border:1px solid rgba(255,255,255,.08);
-            display:none;align-items:center;justify-content:center;cursor:pointer;z-index:20;
-            transition:background .2s ease,transform .15s ease;font-size:20px;line-height:1;
-        }
-        #cookie-btn:active{background:rgba(8,8,8,.8);transform:scale(.9)}
-        #cookie-btn.visible{display:flex}
+        #cookie-btn{left:62px;font-size:20px;line-height:1}
 
-        /* ===== Тост-уведомление ===== */
-        #toast{
-            position:fixed;bottom:calc(60px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%) translateY(20px);
-            background:rgba(18,18,18,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-            border:1px solid rgba(200,160,110,.2);border-radius:12px;
-            padding:14px 22px;color:#e4dcd2;font-size:13.5px;line-height:1.6;
-            max-width:calc(100vw - 40px);text-align:center;
-            opacity:0;pointer-events:none;z-index:50;
-            transition:opacity .35s ease,transform .35s ease;
+        /* ===== Оверлей + попап печенья ===== */
+        #cookie-overlay{
+            position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:45;
+            opacity:0;pointer-events:none;transition:opacity .3s ease;
         }
-        #toast.visible{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+        #cookie-overlay.visible{opacity:1;pointer-events:auto}
+
+        #cookie-popup{
+            position:fixed;
+            top:calc(62px + env(safe-area-inset-top,0px));
+            left:14px;
+            width:calc(100vw - 28px);max-width:320px;
+            background:rgba(18,18,18,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+            border:1px solid rgba(200,160,110,.2);border-radius:14px;
+            padding:16px 42px 16px 18px;
+            color:#e4dcd2;font-size:13.5px;line-height:1.65;
+            z-index:46;
+            opacity:0;transform:translateY(-8px);pointer-events:none;
+            transition:opacity .3s ease,transform .3s ease;
+        }
+        #cookie-popup.visible{opacity:1;transform:translateY(0);pointer-events:auto}
+
+        #cookie-popup::after{
+            content:'';position:absolute;top:-6px;left:40px;
+            width:12px;height:12px;
+            background:rgba(18,18,18,.96);
+            border-left:1px solid rgba(200,160,110,.2);
+            border-top:1px solid rgba(200,160,110,.2);
+            transform:rotate(45deg);
+        }
+
+        #cookie-close{
+            position:absolute;top:10px;right:10px;
+            background:none;border:none;color:#666;font-size:20px;
+            cursor:pointer;padding:2px 5px;line-height:1;
+            transition:color .2s ease;
+        }
+        #cookie-close:active{color:#c8a06e}
 
         /* ===== Музыкальная полка ===== */
         #music-shelf{position:fixed;bottom:0;left:0;right:0;padding:18px 0 calc(26px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,rgba(8,8,8,.94),rgba(8,8,8,.82) 65%,transparent);z-index:10;transition:transform .5s cubic-bezier(.4,0,.2,1),opacity .5s ease}
@@ -170,8 +189,7 @@
             transform:translateY(100%);
             transition:transform .4s cubic-bezier(.4,0,.2,1);
             max-height:calc(100dvh - 40px);
-            overflow-y:auto;
-            scrollbar-width:none;
+            overflow-y:auto;scrollbar-width:none;
         }
         #music-player::-webkit-scrollbar{display:none}
         #music-player.visible{transform:translateY(0)}
@@ -232,12 +250,10 @@
         #carousel-hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);color:rgba(200,160,110,.25);font-size:10.5px;letter-spacing:1.5px;pointer-events:none;animation:hintB 3s ease-in-out infinite;transition:opacity .5s ease;z-index:6}
         #carousel-hint.gone{opacity:0}
     </style>
-<meta name="google-site-verification" content="ykHSkAjw0CL-y8ul3g7qxJOCXvAVgqJVB8mrxoCA1oE" />
-
 </head>
 <body>
 
-<!-- Скрытый SEO-контент, индексируемый поисковиками -->
+<!-- Скрытый SEO-контент -->
 <div hidden itemscope itemtype="https://schema.org/Person">
     <h1 itemprop="name">deeffeop111</h1>
     <p itemprop="description">deeffeop111 — личная страница с интерактивной комнатой. Здесь deeffeop111 делится своими увлечениями: книги, музыка, путешествия, фильмы и игры. Познакомься с deeffeop111.</p>
@@ -282,13 +298,17 @@
     <div id="carousel-hint">свайпай влево и вправо</div>
 </section>
 
-<a id="tg-btn" href="https://t.me/Sdjhsd" target="_blank" rel="noopener noreferrer" aria-label="Написать deeffeop111 в Telegram">
+<a id="tg-btn" class="hub-top-btn" href="https://t.me/Sdjhsd" target="_blank" rel="noopener noreferrer" aria-label="Написать deeffeop111 в Telegram">
     <img src="image/6422206.png" alt="Telegram deeffeop111" width="20" height="20">
 </a>
 
-<div id="cookie-btn" role="button" aria-label="Информация о данных" tabindex="0">🍪</div>
+<div id="cookie-btn" class="hub-top-btn" role="button" aria-label="Информация о данных" tabindex="0">🍪</div>
 
-<div id="toast" role="status" aria-live="polite"></div>
+<div id="cookie-overlay"></div>
+<div id="cookie-popup" role="status" aria-live="polite">
+    <button id="cookie-close" aria-label="Закрыть">&times;</button>
+    Этот сайт не собирает никаких персональных данных.
+</div>
 
 <nav id="back-btn" aria-label="Назад">&larr;</nav>
 <div id="hint" aria-hidden="true">нажимай на светящиеся точки</div>
@@ -300,7 +320,7 @@ const ROOMS = {
         bg: 'image/hub.webp',
         dialogues: [
             { text: 'Привет! Рад, что тебе стало интересно. Это место — дополнение к моему профилю. Мне хотелось рассказать про себя немного более развёрнуто, и в другом формате.', btn: 'Продолжить' },
-            { text: 'Перед тобой комната. Нажимай на подсвеченные предметы, чтобы узнать, чем я живу, какая у меня история или чем я увлекаюсь.', btn: 'Продолжить' },
+            { text: 'Перед тобой моя комната. Нажимай на светящиеся точки — каждая расскажет немного обо мне.', btn: 'Продолжить' },
             { text: 'Если тебе захочется познакомиться —  напиши мне в телеграм или поставь лайк в приложении. Только у меня нет премиума, так что это вариант менее надёжен.', btn: 'Посмотреть комнату' }
         ],
         hotspots: [
@@ -315,7 +335,7 @@ const ROOMS = {
     books: {
         bg: 'image/books.webp',
         dialogues: [
-            { text: 'Тут что-то про то, что я когда-то читал, читаю, или хочу прочитать.', btn: 'Продолжить' },
+            { text: 'Тут что-то про то, что я когда-то читал или читаю сейчас. Эти книги не тронули и не повлияли на меня больше других. Подборка сделана на скорую руку)', btn: 'Продолжить' },
             { text: 'Ты можешь нажать на любую книгу и узнать немного подробнее.', btn: 'Понятно' }
         ],
         books: [
@@ -470,7 +490,9 @@ const backBtn        = document.getElementById('back-btn');
 const hintEl         = document.getElementById('hint');
 const tgBtn          = document.getElementById('tg-btn');
 const cookieBtn      = document.getElementById('cookie-btn');
-const toastEl        = document.getElementById('toast');
+const cookieOverlay  = document.getElementById('cookie-overlay');
+const cookiePopup    = document.getElementById('cookie-popup');
+const cookieClose    = document.getElementById('cookie-close');
 const musicShelf     = document.getElementById('music-shelf');
 const shelfTrack     = document.getElementById('shelf-track');
 const musicPlayer    = document.getElementById('music-player');
@@ -503,21 +525,23 @@ const TYPE_SPEED    = 28;
 
 let cItems = [], cTotal = 0, cCurrent = 0, cTouchX = 0, cHintOn = true;
 
-let toastTimer = null;
-function showToast(msg, duration) {
-    duration = duration || 3500;
-    clearTimeout(toastTimer);
-    toastEl.textContent = msg;
-    toastEl.classList.add('visible');
-    toastTimer = setTimeout(() => { toastEl.classList.remove('visible'); }, duration);
+
+// ——— Попап печенья ———
+function openCookiePopup() {
+    cookieOverlay.classList.add('visible');
+    cookiePopup.classList.add('visible');
+}
+function closeCookiePopup() {
+    cookieOverlay.classList.remove('visible');
+    cookiePopup.classList.remove('visible');
 }
 
-cookieBtn.addEventListener('click', () => {
-    showToast('Этот сайт не собирает никаких персональных данных.');
-});
+cookieBtn.addEventListener('click', openCookiePopup);
 cookieBtn.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); cookieBtn.click(); }
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCookiePopup(); }
 });
+cookieClose.addEventListener('click', closeCookiePopup);
+cookieOverlay.addEventListener('click', closeCookiePopup);
 
 
 function loadRoom(roomId, addToHistory) {
@@ -527,6 +551,7 @@ function loadRoom(roomId, addToHistory) {
     if (addToHistory && currentRoom) history.push(currentRoom);
     isTransitioning = true;
     app.classList.add('fading');
+    closeCookiePopup();
 
     setTimeout(() => {
         currentRoom = roomId; dialogueIndex = 0; isReturnMode = false;
@@ -558,7 +583,6 @@ function loadRoom(roomId, addToHistory) {
             dialogBox.classList.add('hidden'); showRoomContent(room); completedRooms.add(roomId);
         }
 
-        // Обновляем заголовок для SEO — поисковик видит последний заголовок в DOM
         const titles = {
             hub: 'deeffeop111 — Моя комната | Личный профиль и знакомства',
             books: 'deeffeop111 — Книги | Что читает deeffeop111',
