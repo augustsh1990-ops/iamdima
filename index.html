@@ -3,7 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Моя комната</title>
+    <title>deeffeop111 — Моя комната | Личный профиль и знакомства</title>
+    <meta name="description" content="deeffeop111 — личная комната с рассказом о себе, увлечениях, музыке, книгах и путешествиях. Узнай больше про deeffeop111 и познакомься.">
+    <meta name="keywords" content="deeffeop111, deeffeop111 профиль, deeffeop111 знакомства, deeffeop111 комната, deeffeop111 личная страница">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="author" content="deeffeop111">
+    <meta name="theme-color" content="#0a0a0a">
+    <link rel="canonical" href="https://deeffeop111.ru/">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="deeffeop111 — Моя комната">
+    <meta property="og:description" content="Личная комната deeffeop111: увлечения, музыка, книги, путешествия. Дополнение к профилю для знакомства.">
+    <meta property="og:url" content="https://deeffeop111.ru/">
+    <meta property="og:site_name" content="deeffeop111">
+    <meta property="og:locale" content="ru_RU">
+    <meta property="og:image" content="image/hub.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="deeffeop111 — Моя комната">
+    <meta name="twitter:description" content="Личная комната deeffeop111: увлечения, музыка, книги, путешествия.">
+    <meta name="twitter:image" content="image/hub.webp">
+
+    <!-- Structured Data: WebSite -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "deeffeop111",
+        "url": "https://deeffeop111.ru/",
+        "description": "Личная комната deeffeop111 с рассказом о себе, увлечениях, музыке, книгах и путешествиях.",
+        "author": {
+            "@type": "Person",
+            "name": "deeffeop111",
+            "url": "https://t.me/Sdjhsd"
+        },
+        "inLanguage": "ru"
+    }
+    </script>
+
+    <!-- Structured Data: ProfilePage -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "ProfilePage",
+        "name": "deeffeop111 — Моя комната",
+        "description": "Дополнение к профилю deeffeop111. Рассказ о себе в развёрнутом формате: книги, музыка, путешествия, взгляды.",
+        "url": "https://deeffeop111.ru/",
+        "mainEntity": {
+            "@type": "Person",
+            "name": "deeffeop111",
+            "sameAs": [
+                "https://t.me/Sdjhsd"
+            ]
+        },
+        "inLanguage": "ru"
+    }
+    </script>
+
     <link href="https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <style>
         *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -172,30 +232,39 @@
         #carousel-hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);color:rgba(200,160,110,.25);font-size:10.5px;letter-spacing:1.5px;pointer-events:none;animation:hintB 3s ease-in-out infinite;transition:opacity .5s ease;z-index:6}
         #carousel-hint.gone{opacity:0}
     </style>
+<meta name="google-site-verification" content="ykHSkAjw0CL-y8ul3g7qxJOCXvAVgqJVB8mrxoCA1oE" />
+
 </head>
 <body>
 
-<div id="app">
-    <div id="room-bg"></div>
-    <div id="hotspots-container"></div>
+<!-- Скрытый SEO-контент, индексируемый поисковиками -->
+<div hidden itemscope itemtype="https://schema.org/Person">
+    <h1 itemprop="name">deeffeop111</h1>
+    <p itemprop="description">deeffeop111 — личная страница с интерактивной комнатой. Здесь deeffeop111 делится своими увлечениями: книги, музыка, путешествия, фильмы и игры. Познакомься с deeffeop111.</p>
+    <a itemprop="sameAs" href="https://t.me/Sdjhsd">deeffeop111 в Telegram</a>
 </div>
 
-<div id="dialog-box">
+<main id="app" role="main" aria-label="Интерактивная комната deeffeop111">
+    <div id="room-bg" role="img" aria-label="Фон комнаты"></div>
+    <div id="hotspots-container" aria-label="Интерактивные объекты"></div>
+</main>
+
+<section id="dialog-box" role="dialog" aria-label="Диалог" aria-live="polite">
     <div id="dialog-text"></div>
-    <button id="dialog-btn">Продолжить</button>
-</div>
+    <button id="dialog-btn" aria-label="Продолжить">Продолжить</button>
+</section>
 
-<div id="music-shelf" class="hidden"><div id="shelf-track"></div></div>
+<section id="music-shelf" class="hidden" role="region" aria-label="Музыкальная полка"><div id="shelf-track"></div></section>
 
-<div id="music-player">
-    <button id="player-close">&times;</button>
+<section id="music-player" role="region" aria-label="Музыкальный плеер">
+    <button id="player-close" aria-label="Закрыть плеер">&times;</button>
     <div id="player-artist-name"></div>
     <div id="player-content"></div>
-</div>
+</section>
 
-<div id="books-grid-wrap" class="hidden"><div id="books-grid"></div></div>
+<section id="books-grid-wrap" class="hidden" role="region" aria-label="Книги"><div id="books-grid"></div></section>
 
-<div id="book-modal-overlay">
+<div id="book-modal-overlay" role="dialog" aria-label="Описание книги" aria-modal="true">
     <div id="book-modal">
         <div class="modal-book-title" id="modal-title"></div>
         <div class="modal-book-author" id="modal-author"></div>
@@ -203,7 +272,7 @@
     </div>
 </div>
 
-<div id="carousel-wrap" class="hidden">
+<section id="carousel-wrap" class="hidden" role="region" aria-label="Карусель">
     <div id="carousel-stage"></div>
     <div id="carousel-dots"></div>
     <div id="carousel-info">
@@ -211,18 +280,18 @@
         <div id="carousel-counter"></div>
     </div>
     <div id="carousel-hint">свайпай влево и вправо</div>
-</div>
+</section>
 
-<a id="tg-btn" href="https://t.me/Sdjhsd" target="_blank" rel="noopener noreferrer">
-    <img src="image/6422206.png" alt="Telegram">
+<a id="tg-btn" href="https://t.me/Sdjhsd" target="_blank" rel="noopener noreferrer" aria-label="Написать deeffeop111 в Telegram">
+    <img src="image/6422206.png" alt="Telegram deeffeop111" width="20" height="20">
 </a>
 
-<div id="cookie-btn">🍪</div>
+<div id="cookie-btn" role="button" aria-label="Информация о данных" tabindex="0">🍪</div>
 
-<div id="toast"></div>
+<div id="toast" role="status" aria-live="polite"></div>
 
-<div id="back-btn">&larr;</div>
-<div id="hint">нажимай на светящиеся точки</div>
+<nav id="back-btn" aria-label="Назад">&larr;</nav>
+<div id="hint" aria-hidden="true">нажимай на светящиеся точки</div>
 
 <script>
 const ROOMS = {
@@ -446,6 +515,9 @@ function showToast(msg, duration) {
 cookieBtn.addEventListener('click', () => {
     showToast('Этот сайт не собирает никаких персональных данных.');
 });
+cookieBtn.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); cookieBtn.click(); }
+});
 
 
 function loadRoom(roomId, addToHistory) {
@@ -473,7 +545,6 @@ function loadRoom(roomId, addToHistory) {
         carouselWrap.classList.add('hidden');
         closePlayer(); closeBookModal();
 
-        // Кнопки хаба: видны только в хабе
         const isHub = (roomId === 'hub');
         tgBtn.classList.toggle('visible', isHub);
         cookieBtn.classList.toggle('visible', isHub);
@@ -486,6 +557,18 @@ function loadRoom(roomId, addToHistory) {
         } else {
             dialogBox.classList.add('hidden'); showRoomContent(room); completedRooms.add(roomId);
         }
+
+        // Обновляем заголовок для SEO — поисковик видит последний заголовок в DOM
+        const titles = {
+            hub: 'deeffeop111 — Моя комната | Личный профиль и знакомства',
+            books: 'deeffeop111 — Книги | Что читает deeffeop111',
+            views: 'deeffeop111 — Фильмы, игры и развлечения',
+            music: 'deeffeop111 — Музыка | Что слушает deeffeop111',
+            travels: 'deeffeop111 — Путешествия | Где был deeffeop111',
+            dreams: 'deeffeop111 — О себе | Комната deeffeop111'
+        };
+        document.title = titles[roomId] || 'deeffeop111 — Моя комната';
+
         app.classList.remove('fading'); isTransitioning = false;
     }, 460);
 }
@@ -624,7 +707,7 @@ function showCarousel(room) {
     carouselStage.innerHTML = '';
     cItems.forEach(item => {
         const card = document.createElement('div'); card.className = 'c-card';
-        card.innerHTML = '<img src="'+item.image+'" alt="" loading="eager">'; carouselStage.appendChild(card);
+        card.innerHTML = '<img src="'+item.image+'" alt="deeffeop111 — развлечения" loading="eager">'; carouselStage.appendChild(card);
     });
     carouselDots.innerHTML = '';
     if (cTotal <= 20) cItems.forEach(() => { const d = document.createElement('div'); d.className = 'c-dot'; carouselDots.appendChild(d); });
